@@ -1,21 +1,31 @@
-// components/bills/BillHeader.tsx
-import { View, Text, StyleSheet } from 'react-native';
+// components/bills/BillsHeader.tsx
+import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 
 interface BillHeaderProps {
   count: number;
+  onAddPress: () => void;
 }
 
-export function BillHeader({ count }: BillHeaderProps) {
+export function BillHeader({ count, onAddPress }: BillHeaderProps) {
   return (
     <View style={styles.header}>
-      <Text style={styles.title}>Recent Bills</Text>
-      <Text style={styles.subtitle}>{count} total bills</Text>
+      <View>
+        <Text style={styles.title}>Bills</Text>
+        <Text style={styles.subtitle}>{count} total bills</Text>
+      </View>
+      <TouchableOpacity style={styles.addButton} onPress={onAddPress}>
+        <Feather name="plus" size={24} color="white" />
+      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
     marginBottom: 24,
   },
   title: {
@@ -28,6 +38,23 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#718096',
   },
+  addButton: {
+    backgroundColor: '#4299E1',
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#4299E1',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
+  },
 });
-
-

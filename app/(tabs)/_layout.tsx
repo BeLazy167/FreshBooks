@@ -1,4 +1,3 @@
-// This file is intentionally left empty
 import { SimpleLineIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import Feather from '@expo/vector-icons/Feather';
 import { Tabs } from 'expo-router';
@@ -7,7 +6,7 @@ export default function TabLayout() {
   return (
     <Tabs screenOptions={{ tabBarActiveTintColor: '#007AFF' }}>
       <Tabs.Screen
-        name="bills"
+        name="bills/bill"
         options={{
           tabBarIcon: ({ color, size }) => <Feather name="list" size={size} color={color} />,
           headerShown: false,

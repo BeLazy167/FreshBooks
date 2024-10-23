@@ -18,7 +18,7 @@ export default function CreateBillScreen() {
     console.log('Created bill:', newBill);
 
     // Navigate back to bills list
-    router.push('/bills');
+    router.push('/bills/bill');
   };
 
   return (
