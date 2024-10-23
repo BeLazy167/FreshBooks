@@ -6,14 +6,14 @@ export default function TabLayout() {
   return (
     <Tabs screenOptions={{ tabBarActiveTintColor: '#007AFF' }}>
       <Tabs.Screen
-        name="bills/bill"
+        name="bills/index"
         options={{
           tabBarIcon: ({ color, size }) => <Feather name="list" size={size} color={color} />,
           headerShown: false,
         }}
       />
       <Tabs.Screen
-        name="bills/create"
+        name="create/index"
         options={{
           title: 'New Bill',
           tabBarIcon: ({ color, size }) => <Feather name="plus-square" size={size} color={color} />,
