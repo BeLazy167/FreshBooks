@@ -1,12 +1,15 @@
-import { StyleSheet, SafeAreaView } from 'react-native';
+// components/ui/Container.tsx
+import type { PropsWithChildren } from 'react';
+import { View, StyleSheet } from 'react-native';
 
-export const Container = ({ children }: { children: React.ReactNode }) => {
-  return <SafeAreaView style={styles.container}>{children}</SafeAreaView>;
-};
+export function Container({ children }: PropsWithChildren) {
+  return <View style={styles.container}>{children}</View>;
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 24,
+    padding: 16,
+    backgroundColor: '#fff',
   },
 });

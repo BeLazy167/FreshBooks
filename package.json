@@ -11,10 +11,12 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "@expo/vector-icons": "^14.0.0",
+    "@expo/vector-icons": "^14.0.4",
     "@react-navigation/native": "^6.1.7",
     "expo": "^51.0.38",
     "expo-constants": "~16.0.1",
+    "expo-crypto": "^13.0.2",
+    "expo-linear-gradient": "^13.0.2",
     "expo-linking": "~6.3.1",
     "expo-router": "~3.5.14",
     "expo-status-bar": "~1.12.1",
