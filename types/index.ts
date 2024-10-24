@@ -1,4 +1,3 @@
-// This file is intentionally left empty
 // types/index.ts
 export interface VegetableItem {
   id: string;

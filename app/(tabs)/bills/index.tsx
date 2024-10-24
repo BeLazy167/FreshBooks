@@ -1,7 +1,7 @@
 // app/(tabs)/bills/index.tsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Stack, router } from 'expo-router';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View, ActivityIndicator } from 'react-native';
 import { Container } from '~/components/Container';
 import { BillHeader } from '~/components/bills/BillHeader';
 import { BillSearch } from '~/components/bills/BillSearch';
@@ -9,13 +9,19 @@ import { BillFilter } from '~/components/bills/BillFilter';
 import { BillList } from '~/components/bills/BillList';
 import { EmptyState } from '~/components/bills/EmptyState';
 import BillFromId from '~/components/bills/BillFromId';
+import { useBillStore } from '~/app/store/bills';
 import type { Bill } from '~/types';
-import { mockBills } from '~/utils/data';
 
 export default function BillsScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'date' | 'amount'>('date');
   const [selectedBillId, setSelectedBillId] = useState<string | null>(null);
+
+  const { bills, loading, error, fetchBills } = useBillStore();
+
+  useEffect(() => {
+    fetchBills();
+  }, []);
 
   const handleBillPress = (bill: Bill) => {
     setSelectedBillId(bill.id);
@@ -29,7 +35,7 @@ export default function BillsScreen() {
     setSelectedBillId(null);
   };
 
-  const filteredBills = mockBills
+  const filteredBills = bills
     .filter((bill) => bill.providerName.toLowerCase().includes(searchQuery.toLowerCase()))
     .sort((a, b) => {
       if (sortBy === 'date') {
@@ -37,6 +43,29 @@ export default function BillsScreen() {
       }
       return b.total - a.total;
     });
+
+  if (loading) {
+    return (
+      <Container>
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color="#007AFF" />
+        </View>
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container>
+        <View style={styles.centered}>
+          <EmptyState
+            isFiltered={searchQuery.length > 0}
+            onAddPress={handleAddBill}
+          />
+        </View>
+      </Container>
+    );
+  }
 
   return (
     <Container>
@@ -52,12 +81,19 @@ export default function BillsScreen() {
         {filteredBills.length > 0 ? (
           <BillList bills={filteredBills} onBillPress={handleBillPress} />
         ) : (
-          <EmptyState isFiltered={searchQuery.length > 0} onAddPress={handleAddBill} />
+          <EmptyState 
+            isFiltered={searchQuery.length > 0} 
+            onAddPress={handleAddBill}
+          />
         )}
       </ScrollView>
 
       {selectedBillId && (
-        <BillFromId id={selectedBillId} onClose={handleCloseModal} visible={true} />
+        <BillFromId 
+          id={selectedBillId} 
+          onClose={handleCloseModal} 
+          visible={true} 
+        />
       )}
     </Container>
   );
@@ -70,5 +106,10 @@ const styles = StyleSheet.create({
   searchFilters: {
     marginBottom: 24,
     gap: 12,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
