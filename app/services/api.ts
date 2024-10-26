@@ -1,4 +1,4 @@
-import { Bill, Provider } from '~/types';
+import { Bill, Provider, Vegetables } from '~/types';
 
 // services/api.ts
 const API_URL = 'http://localhost:3000/api';
@@ -77,6 +77,19 @@ export const ProviderAPI = {
     return fetchAPI<Provider>(`/providers/${id}`, {
       method: 'PUT',
       body: JSON.stringify(updates),
+    });
+  },
+};
+
+export const VegetableAPI = {
+  async getAll() {
+    return fetchAPI<Vegetables[]>('/vegetables');
+  },
+
+  async create(vegetable: Omit<Vegetables, 'id'>) {
+    return fetchAPI<Vegetables>('/vegetables', {
+      method: 'POST',
+      body: JSON.stringify(vegetable),
     });
   },
 };

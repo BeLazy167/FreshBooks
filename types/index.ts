@@ -43,12 +43,17 @@ export interface ValidationError {
  * Vegetable related types
  */
 export interface VegetableItem {
-  id: string;
+  id: string ;
   name: string;
   quantity: number;
   price: number;
-  item_total: number;
+  item_total?: number;
   isAvailable?: boolean;
+}
+export interface Vegetables {
+  id: string;
+  name: string;
+  isAvailable: boolean;
 }
 
 /**
@@ -60,7 +65,7 @@ export interface Bill {
   providerName: string;
   items: VegetableItem[];
   signer: string;
-  total: string;
+  total: number;
   created_at: Date;
   date: Date;
 }
@@ -73,6 +78,7 @@ export interface CreateBillDTO {
   signer: string;
   date: Date;
 }
+
 
 /**
  * Provider related types
