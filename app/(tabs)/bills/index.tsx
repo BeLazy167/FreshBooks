@@ -8,7 +8,7 @@ import { BillSearch } from '~/components/bills/BillSearch';
 import { BillFilter } from '~/components/bills/BillFilter';
 import { BillList } from '~/components/bills/BillList';
 import { EmptyState } from '~/components/bills/EmptyState';
-import BillFromId from '~/components/bills/BillFromId';
+import { BillFromId } from '~/components/bills/BillFromId';
 import { useBillStore } from '~/app/store/bills';
 import type { Bill } from '~/types';
 
@@ -16,6 +16,7 @@ export default function BillsScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'date' | 'amount'>('date');
   const [selectedBillId, setSelectedBillId] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   const { bills, loading, error, fetchBills } = useBillStore();
 
@@ -38,11 +39,17 @@ export default function BillsScreen() {
   const filteredBills = bills
     .filter((bill) => bill.providerName.toLowerCase().includes(searchQuery.toLowerCase()))
     .sort((a, b) => {
+      const multiplier = sortDirection === 'desc' ? 1 : -1;
       if (sortBy === 'date') {
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        return multiplier * (new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
       }
-      return Number(b.total) - Number(a.total);
+      return multiplier * (Number(b.total) - Number(a.total));
     });
+
+  const handleSortChange = (newSort: { option: 'date' | 'amount'; direction: 'asc' | 'desc' }) => {
+    setSortBy(newSort.option);
+    setSortDirection(newSort.direction);
+  };
 
   if (loading) {
     return (
@@ -72,7 +79,10 @@ export default function BillsScreen() {
 
         <View style={styles.searchFilters}>
           <BillSearch value={searchQuery} onChangeText={setSearchQuery} />
-          <BillFilter sortBy={sortBy} onSortChange={setSortBy} />
+          <BillFilter
+            sortState={{ option: sortBy, direction: sortDirection }}
+            onSortChange={handleSortChange}
+          />
         </View>
 
         {filteredBills.length > 0 ? (

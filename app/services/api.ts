@@ -1,7 +1,7 @@
 import { Bill, Provider, Vegetables } from '~/types';
 
 // services/api.ts
-const API_URL = 'http://localhost:3000/api';
+const API_URL = 'https://freshbooksbackend.onrender.com/api';
 
 // Helper function for API calls
 async function fetchAPI<T>(

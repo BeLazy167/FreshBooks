@@ -8,8 +8,9 @@ import { useBillStore } from '~/app/store/bills';
 export default function CreateBillScreen() {
   const { createBill } = useBillStore();
   const handleCreateBill = (billData: CreateBillDTO) => {
-    const newBill: Omit<Bill, "id" | "created_at" | "date"> = {
+    const newBill: Omit<Bill, 'id' | 'created_at' | 'date'> = {
       ...billData,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       created_at: new Date(),
       date: new Date(),
     };

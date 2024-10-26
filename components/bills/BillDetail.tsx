@@ -119,7 +119,7 @@ export function BillDetail({ bill }: BillDetailProps) {
 
           <div class="total-section">
             <div class="total">
-              Total Amount: ${formatCurrency(bill.total)}
+              Total Amount: ${formatCurrency(bill.total.toString())}
             </div>
           </div>
 
@@ -147,7 +147,7 @@ ${bill.items
   )
   .join('\n')}
 
-Total Amount: ${formatCurrency(bill.total)}
+Total Amount: ${formatCurrency(bill.total.toString())}
 
 Thank you for your business!`;
 
@@ -203,9 +203,7 @@ Thank you for your business!`;
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <View style={styles.providerInfo}>
-            <View style={styles.iconContainer}>
-              <Feather name="shopping-bag" size={24} color="#4299E1" />
-            </View>
+            
             <View>
               <Text style={styles.providerName}>{bill.providerName}</Text>
               <Text style={styles.date}>{new Date(bill.date).toLocaleDateString()}</Text>
@@ -217,7 +215,7 @@ Thank you for your business!`;
       <View style={styles.totalSection}>
         <View style={styles.totalRow}>
           <Text style={styles.totalLabel}>Total Amount</Text>
-          <Text style={styles.totalAmount}>{formatCurrency(bill.total)}</Text>
+          <Text style={styles.totalAmount}>{formatCurrency(bill.total.toString())}</Text>
         </View>
 
         <View style={styles.actionButtons}>
@@ -264,13 +262,15 @@ Thank you for your business!`;
                   {item.quantity} × {formatCurrency(item.price.toString())}
                 </Text>
               </View>
-              <Text style={styles.itemTotal}>{formatCurrency(item.item_total.toString())}</Text>
+              <Text style={styles.itemTotal}>
+                {formatCurrency(item.item_total?.toString() || '0')}
+              </Text>
             </View>
           ))}
 
           <View style={styles.subtotalRow}>
             <Text style={styles.subtotalLabel}>Subtotal</Text>
-            <Text style={styles.subtotalAmount}>{formatCurrency(bill.total)}</Text>
+            <Text style={styles.subtotalAmount}>{formatCurrency(bill.total.toString())}</Text>
           </View>
         </View>
       </View>
@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     borderWidth: 1,
     borderColor: 'black',
-  
+
     padding: 16,
     alignItems: 'center',
     borderRadius: 16,
@@ -319,6 +319,7 @@ const styles = StyleSheet.create({
   date: {
     fontSize: 16,
     color: '#718096',
+    alignSelf: 'center',
   },
   section: {
     marginBottom: 24,

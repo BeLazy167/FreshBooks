@@ -1,80 +1,4 @@
-// // This file is intentionally left empty
-// // components/bills/BillCard.tsx
-// import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
-// import type { Bill } from '../../types';
-// import { formatCurrency, formatDate } from '../../utils';
-
-// interface BillCardProps {
-//   bill: Bill;
-//   onPress?: () => void;
-// }
-
-// export function BillCard({ bill, onPress }: BillCardProps) {
-//   return (
-//     <TouchableOpacity onPress={onPress} style={styles.card}>
-//       <View style={styles.header}>
-//         <Text style={styles.title}>{bill.providerName}</Text>
-//         <Text style={styles.date}>{formatDate(bill.date)}</Text>
-//       </View>
-//       <View style={styles.signer}>
-//         <Text style={styles.signerText}>Signed by {bill.signer}</Text>
-//       </View>
-//       <View style={styles.footer}>
-//         <Text style={styles.items}>{bill.items.length} items</Text>
-//         <Text style={styles.signerText}>Signed by {bill.signer}</Text>
-
-//         <Text style={styles.total}>{formatCurrency(bill.total)}</Text>
-//       </View>
-//     </TouchableOpacity>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   card: {
-//     backgroundColor: 'white',
-//     borderRadius: 8,
-//     padding: 16,
-//     marginBottom: 12,
-//     elevation: 2,
-//     shadowColor: '#000',
-//     shadowOffset: { width: 0, height: 2 },
-//     shadowOpacity: 0.1,
-//     shadowRadius: 4,
-//   },
-//   header: {
-//     marginBottom: 12,
-//   },
-//   title: {
-//     fontSize: 18,
-//     fontWeight: '600',
-//   },
-//   signer: {
-//     marginBottom: 12,
-//   },
-//   signerText: {
-//     fontSize: 14,
-//     color: '#666',
-//   },
-//   date: {
-//     fontSize: 14,
-//     color: '#666',
-//     marginTop: 4,
-//   },
-//   footer: {
-//     flexDirection: 'row',
-//     justifyContent: 'space-between',
-//     alignItems: 'center',
-//   },
-//   items: {
-//     fontSize: 14,
-//     color: '#666',
-//   },
-//   total: {
-//     fontSize: 18,
-//     fontWeight: '600',
-//   },
-// });
 
 // components/bills/BillCard.tsx
 import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
@@ -108,7 +32,7 @@ export function BillCard({ bill, onPress }: BillCardProps) {
           </View>
 
           <Text style={styles.signerText}>{bill.signer}</Text>
-          <Text style={styles.total}>{formatCurrency(bill.total)}</Text>
+          <Text style={styles.total}>{formatCurrency(bill.total.toString())}</Text>
         </View>
       </View>
     </TouchableOpacity>
