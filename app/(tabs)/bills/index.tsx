@@ -39,9 +39,9 @@ export default function BillsScreen() {
     .filter((bill) => bill.providerName.toLowerCase().includes(searchQuery.toLowerCase()))
     .sort((a, b) => {
       if (sortBy === 'date') {
-        return new Date(b.date).getTime() - new Date(a.date).getTime();
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       }
-      return b.total - a.total;
+      return Number(b.total) - Number(a.total);
     });
 
   if (loading) {
@@ -58,10 +58,7 @@ export default function BillsScreen() {
     return (
       <Container>
         <View style={styles.centered}>
-          <EmptyState
-            isFiltered={searchQuery.length > 0}
-            onAddPress={handleAddBill}
-          />
+          <EmptyState isFiltered={searchQuery.length > 0} onAddPress={handleAddBill} />
         </View>
       </Container>
     );
@@ -81,19 +78,12 @@ export default function BillsScreen() {
         {filteredBills.length > 0 ? (
           <BillList bills={filteredBills} onBillPress={handleBillPress} />
         ) : (
-          <EmptyState 
-            isFiltered={searchQuery.length > 0} 
-            onAddPress={handleAddBill}
-          />
+          <EmptyState isFiltered={searchQuery.length > 0} onAddPress={handleAddBill} />
         )}
       </ScrollView>
 
       {selectedBillId && (
-        <BillFromId 
-          id={selectedBillId} 
-          onClose={handleCloseModal} 
-          visible={true} 
-        />
+        <BillFromId id={selectedBillId} onClose={handleCloseModal} visible={true} />
       )}
     </Container>
   );

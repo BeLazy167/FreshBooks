@@ -2,8 +2,8 @@
 // utils/index.ts
 import * as Crypto from 'expo-crypto';
 
-export const formatCurrency = (amount: number) => {
-  return `$${amount.toFixed(2)}`;
+export const formatCurrency = (amount: string) => {
+  return `$${amount}`;
 };
 
 export const formatDate = (date: string) => {

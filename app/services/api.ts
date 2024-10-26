@@ -1,7 +1,7 @@
 import { Bill, Provider } from '~/types';
 
 // services/api.ts
-const API_URL = 'http://your-api-url:3000/api';
+const API_URL = 'http://localhost:3000/api';
 
 // Helper function for API calls
 async function fetchAPI<T>(
@@ -54,7 +54,12 @@ export const BillAPI = {
 
 export const ProviderAPI = {
   async getAll() {
-    return fetchAPI<Provider[]>('/providers');
+    return fetchAPI<Provider[]>('/providers', {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      method: 'GET',
+    });
   },
 
   async getById(id: string) {

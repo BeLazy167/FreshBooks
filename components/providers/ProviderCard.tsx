@@ -18,10 +18,10 @@ export function ProviderCard({ provider, onPress }: ProviderCardProps) {
           </View>
           <View>
             <Text style={styles.providerName}>{provider.name}</Text>
-            {provider.phone && (
+            {provider.mobile && (
               <View style={styles.phoneContainer}>
                 <Feather name="phone" size={14} color="#718096" />
-                <Text style={styles.providerPhone}>{provider.phone}</Text>
+                <Text style={styles.providerPhone}>{provider.mobile}</Text>
               </View>
             )}
           </View>

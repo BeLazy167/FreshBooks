@@ -1,4 +1,12 @@
-import { View, Text, TouchableOpacity, StyleSheet, Platform, Alert, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Platform,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import type { Bill } from '~/types';
 import { formatCurrency } from '~/utils';
@@ -94,14 +102,18 @@ export function BillDetail({ bill }: BillDetailProps) {
               </tr>
             </thead>
             <tbody>
-              ${bill.items.map(item => `
+              ${bill.items
+                .map(
+                  (item) => `
                 <tr>
                   <td>${item.name}</td>
                   <td>${item.quantity}</td>
-                  <td>${formatCurrency(item.price)}</td>
-                  <td>${formatCurrency(item.quantity * item.price)}</td>
+                  <td>${formatCurrency(item.price.toString())}</td>
+                  <td>${formatCurrency((item.quantity * Number(item.price)).toString())}</td>
                 </tr>
-              `).join('')}
+              `
+                )
+                .join('')}
             </tbody>
           </table>
 
@@ -128,8 +140,12 @@ Receipt from ${bill.providerName}
 Date: ${new Date(bill.date).toLocaleDateString()}
 
 Items:
-${bill.items.map(item => `• ${item.name}
-  ${item.quantity} × ${formatCurrency(item.price)} = ${formatCurrency(item.quantity * item.price)}`).join('\n')}
+${bill.items
+  .map(
+    (item) => `• ${item.name}
+  ${item.quantity} × ${formatCurrency(item.price.toString())} = ${formatCurrency((item.quantity * Number(item.price)).toString())}`
+  )
+  .join('\n')}
 
 Total Amount: ${formatCurrency(bill.total)}
 
@@ -160,24 +176,22 @@ Thank you for your business!`;
       setIsLoading(true);
       const { uri } = await Print.printToFileAsync({
         html: generatePrintHTML(),
-        base64: false
+        base64: false,
       });
 
       if (Platform.OS === 'ios') {
         await Sharing.shareAsync(uri);
       } else {
-        await Sharing.shareAsync(uri, { 
+        await Sharing.shareAsync(uri, {
           UTI: '.pdf',
           mimeType: 'application/pdf',
-          dialogTitle: 'View your receipt'
+          dialogTitle: 'View your receipt',
         });
       }
     } catch (error) {
-      Alert.alert(
-        'Print Error',
-        'Failed to generate or share the PDF. Please try again.',
-        [{ text: 'OK' }]
-      );
+      Alert.alert('Print Error', 'Failed to generate or share the PDF. Please try again.', [
+        { text: 'OK' },
+      ]);
       console.error('Print error:', error);
     } finally {
       setIsLoading(false);
@@ -194,40 +208,8 @@ Thank you for your business!`;
             </View>
             <View>
               <Text style={styles.providerName}>{bill.providerName}</Text>
-              <Text style={styles.date}>
-                {new Date(bill.date).toLocaleDateString()}
-              </Text>
+              <Text style={styles.date}>{new Date(bill.date).toLocaleDateString()}</Text>
             </View>
-          </View>
-        </View>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Items</Text>
-        <View style={styles.itemsCard}>
-          {bill.items.map((item, index) => (
-            <View 
-              key={index} 
-              style={[
-                styles.itemRow,
-                index === bill.items.length - 1 && styles.lastItemRow
-              ]}
-            >
-              <View style={styles.itemInfo}>
-                <Text style={styles.itemName}>{item.name}</Text>
-                <Text style={styles.itemQuantity}>
-                  {item.quantity} × {formatCurrency(item.price)}
-                </Text>
-              </View>
-              <Text style={styles.itemTotal}>
-                {formatCurrency(item.quantity * item.price)}
-              </Text>
-            </View>
-          ))}
-
-          <View style={styles.subtotalRow}>
-            <Text style={styles.subtotalLabel}>Subtotal</Text>
-            <Text style={styles.subtotalAmount}>{formatCurrency(bill.total)}</Text>
           </View>
         </View>
       </View>
@@ -239,11 +221,10 @@ Thank you for your business!`;
         </View>
 
         <View style={styles.actionButtons}>
-          <TouchableOpacity 
-            style={[styles.actionButton, styles.printButton]} 
+          <TouchableOpacity
+            style={[styles.actionButton, styles.printButton]}
             onPress={handlePrint}
-            disabled={isLoading}
-          >
+            disabled={isLoading}>
             {isLoading ? (
               <ActivityIndicator size="small" color="#4299E1" />
             ) : (
@@ -254,11 +235,10 @@ Thank you for your business!`;
             )}
           </TouchableOpacity>
 
-          <TouchableOpacity 
-            style={[styles.actionButton, styles.shareButton]} 
+          <TouchableOpacity
+            style={[styles.actionButton, styles.shareButton]}
             onPress={handleShare}
-            disabled={isLoading}
-          >
+            disabled={isLoading}>
             {isLoading ? (
               <ActivityIndicator size="small" color="#4299E1" />
             ) : (
@@ -270,6 +250,30 @@ Thank you for your business!`;
           </TouchableOpacity>
         </View>
       </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Items</Text>
+        <View style={styles.itemsCard}>
+          {bill.items.map((item, index) => (
+            <View
+              key={index}
+              style={[styles.itemRow, index === bill.items.length - 1 && styles.lastItemRow]}>
+              <View style={styles.itemInfo}>
+                <Text style={styles.itemName}>{item.name}</Text>
+                <Text style={styles.itemQuantity}>
+                  {item.quantity} × {formatCurrency(item.price.toString())}
+                </Text>
+              </View>
+              <Text style={styles.itemTotal}>{formatCurrency(item.item_total.toString())}</Text>
+            </View>
+          ))}
+
+          <View style={styles.subtotalRow}>
+            <Text style={styles.subtotalLabel}>Subtotal</Text>
+            <Text style={styles.subtotalAmount}>{formatCurrency(bill.total)}</Text>
+          </View>
+        </View>
+      </View>
     </View>
   );
 }
@@ -278,10 +282,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#F7FAFC',
   },
   header: {
     marginBottom: 24,
+    borderWidth: 1,
+    borderColor: 'black',
+  
+    padding: 16,
+    alignItems: 'center',
+    borderRadius: 16,
   },
   headerTop: {
     flexDirection: 'row',
@@ -313,6 +322,10 @@ const styles = StyleSheet.create({
   },
   section: {
     marginBottom: 24,
+    borderWidth: 1,
+    borderColor: 'black',
+    borderRadius: 16,
+    padding: 8,
   },
   sectionTitle: {
     fontSize: 18,
@@ -388,6 +401,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 16,
     padding: 16,
+    borderWidth: 1,
+    borderColor: 'black',
+    marginBottom: 24,
     ...Platform.select({
       ios: {
         shadowColor: '#000',

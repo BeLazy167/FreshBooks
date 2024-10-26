@@ -1,13 +1,13 @@
 // components/bills/BillFromId.tsx
 import React, { useState, useEffect } from 'react';
-import { 
-  ScrollView, 
-  StyleSheet, 
-  Modal, 
-  View, 
-  TouchableOpacity, 
+import {
+  ScrollView,
+  StyleSheet,
+  Modal,
+  View,
+  TouchableOpacity,
   Text,
-  ActivityIndicator 
+  ActivityIndicator,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { Container } from '~/components/Container';
@@ -52,28 +52,21 @@ export default function BillFromId({ id, onClose, visible }: BillFromIdProps) {
   };
 
   return (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={visible}
-      onRequestClose={onClose}
-    >
+    <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
-          <TouchableOpacity 
-            style={styles.closeButton} 
+          <TouchableOpacity
+            style={styles.closeButton}
             onPress={onClose}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          >
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
             <Feather name="x" size={24} color="#4A5568" />
           </TouchableOpacity>
 
           <Container>
-            <ScrollView 
-              showsVerticalScrollIndicator={false} 
+            <ScrollView
+              showsVerticalScrollIndicator={false}
               style={styles.container}
-              contentContainerStyle={styles.contentContainer}
-            >
+              contentContainerStyle={styles.contentContainer}>
               {loading ? (
                 <View style={styles.loadingContainer}>
                   <ActivityIndicator size="large" color="#007AFF" />
@@ -82,10 +75,7 @@ export default function BillFromId({ id, onClose, visible }: BillFromIdProps) {
                 <View style={styles.errorContainer}>
                   <Feather name="alert-circle" size={24} color="#F56565" />
                   <Text style={styles.errorText}>{error}</Text>
-                  <TouchableOpacity 
-                    style={styles.retryButton}
-                    onPress={loadBill}
-                  >
+                  <TouchableOpacity style={styles.retryButton} onPress={loadBill}>
                     <Text style={styles.retryText}>Try Again</Text>
                   </TouchableOpacity>
                 </View>
@@ -115,7 +105,6 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: '#F7FAFC',
   },
   contentContainer: {
     padding: 16,

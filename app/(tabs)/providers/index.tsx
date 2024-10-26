@@ -6,15 +6,15 @@ import { ProviderCard } from '~/components/providers/ProviderCard';
 import { ProviderHeader } from '~/components/providers/ProviderHeader';
 import { EmptyState } from '~/components/providers/EmptyState';
 import type { Provider } from '~/types';
-
-const mockProviders: Provider[] = [
-  { id: '1', name: 'Fresh Farms', phone: '123-456-7890' },
-  { id: '2', name: 'Green Gardens', phone: '098-765-4321' },
-  { id: '3', name: 'Valley Veggies', phone: '555-123-4567' },
-  { id: '4', name: 'Local Harvest', phone: '777-888-9999' },
-];
-
+import { useProviderStore } from '~/app/store/providers';
+import { useEffect } from 'react';
 export default function ProvidersScreen() {
+  const { providers, loading, error, fetchProviders } = useProviderStore();
+
+  useEffect(() => {
+    fetchProviders();
+  }, []);
+
   const handleAddProvider = () => {
     // Navigate to add provider screen
     console.log('Add provider');
@@ -36,11 +36,11 @@ export default function ProvidersScreen() {
       />
       <Container>
         <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
-          <ProviderHeader count={mockProviders.length} onAddPress={handleAddProvider} />
+          <ProviderHeader count={providers.length} onAddPress={handleAddProvider} />
 
-          {mockProviders.length > 0 ? (
+          {providers.length > 0 ? (
             <View style={styles.list}>
-              {mockProviders.map((provider) => (
+              {providers.map((provider) => (
                 <ProviderCard
                   key={provider.id}
                   provider={provider}

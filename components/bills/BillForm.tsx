@@ -2,7 +2,7 @@
 
 // components/bills/BillForm.tsx
 import { Feather } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -12,22 +12,30 @@ import {
   ScrollView,
   Platform,
 } from 'react-native';
-
-import type { Bill, VegetableItem } from '~/types';
+import { useProviderStore } from '~/app/store/providers';
+import type { CreateBillDTO, VegetableItem } from '~/types';
 import { formatCurrency } from '~/utils';
+import { SearchableDropdown } from '../providers/SearchableDropdown';
+
 interface BillFormProps {
-  onSubmit: (bill: Omit<Bill, 'id' | 'date'>) => void;
+  onSubmit: (bill: CreateBillDTO) => void;
 }
 
 export function BillForm({ onSubmit }: BillFormProps) {
+  const { providers, loading, error, fetchProviders } = useProviderStore();
   const [providerName, setProviderName] = useState('');
   const [items, setItems] = useState<Omit<VegetableItem, 'id'>[]>([]);
   const [currentItem, setCurrentItem] = useState({
     name: '',
-    quantity: '',
-    price: '',
-    signer: 'DK',
+    quantity: 0,
+    price: 0,
   });
+
+  useEffect(() => {
+    if (providers.length === 0) {
+      fetchProviders();
+    }
+  }, [providers]);
 
   const addItem = () => {
     if (currentItem.name && currentItem.quantity && currentItem.price) {
@@ -37,9 +45,10 @@ export function BillForm({ onSubmit }: BillFormProps) {
           name: currentItem.name,
           quantity: Number(currentItem.quantity),
           price: Number(currentItem.price),
+          item_total: Number(currentItem.quantity) * Number(currentItem.price),
         },
       ]);
-      setCurrentItem({ name: '', quantity: '', price: '', signer: 'DK' });
+      setCurrentItem({ name: '', quantity: 0, price: 0 });
     }
   };
 
@@ -54,11 +63,12 @@ export function BillForm({ onSubmit }: BillFormProps) {
   const handleSubmit = () => {
     if (providerName && items.length > 0) {
       onSubmit({
-        providerName,
         items: items.map((item, index) => ({ ...item, id: index.toString() })),
         total: calculateTotal(),
-        signer: currentItem.signer,
-        providerId: '',
+        providerId: 'Provider 1',
+        providerName: providerName,
+        signer: 'DK',
+        date: new Date(),
       });
       setProviderName('');
       setItems([]);
@@ -67,6 +77,15 @@ export function BillForm({ onSubmit }: BillFormProps) {
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <Text style={styles.title}>Create Bill</Text>
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Provider Name</Text>
+        <SearchableDropdown
+          data={providers}
+          value={providerName}
+          onSelect={setProviderName}
+          placeholder="Select a provider"
+        />
+      </View>
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Provider Name</Text>
@@ -97,8 +116,10 @@ export function BillForm({ onSubmit }: BillFormProps) {
           <View style={[styles.inputContainer, styles.smallInputContainer]}>
             <TextInput
               style={[styles.input, styles.smallInput]}
-              value={currentItem.quantity}
-              onChangeText={(text) => setCurrentItem((prev) => ({ ...prev, quantity: text }))}
+              value={currentItem.quantity.toString()}
+              onChangeText={(text) =>
+                setCurrentItem((prev) => ({ ...prev, quantity: Number(text) }))
+              }
               placeholder="Qty"
               keyboardType="numeric"
               placeholderTextColor="#A0AEC0"
@@ -108,8 +129,8 @@ export function BillForm({ onSubmit }: BillFormProps) {
           <View style={[styles.inputContainer, styles.smallInputContainer]}>
             <TextInput
               style={[styles.input, styles.smallInput]}
-              value={currentItem.price}
-              onChangeText={(text) => setCurrentItem((prev) => ({ ...prev, price: text }))}
+              value={currentItem.price.toString()}
+              onChangeText={(text) => setCurrentItem((prev) => ({ ...prev, price: Number(text) }))}
               placeholder="Price"
               keyboardType="numeric"
               placeholderTextColor="#A0AEC0"
@@ -136,11 +157,13 @@ export function BillForm({ onSubmit }: BillFormProps) {
               <View style={styles.flex}>
                 <Text style={styles.itemName}>{item.name}</Text>
                 <Text style={styles.itemDetails}>
-                  {item.quantity} × {formatCurrency(item.price)}
+                  {item.quantity} × {formatCurrency(item.price.toString())}
                 </Text>
               </View>
               <View style={styles.itemActions}>
-                <Text style={styles.itemTotal}>{formatCurrency(item.quantity * item.price)}</Text>
+                <Text style={styles.itemTotal}>
+                  {formatCurrency((item.quantity * item.price).toString())}
+                </Text>
                 <TouchableOpacity style={styles.removeButton} onPress={() => removeItem(index)}>
                   <Feather name="x" size={16} color="white" />
                 </TouchableOpacity>
@@ -150,7 +173,7 @@ export function BillForm({ onSubmit }: BillFormProps) {
 
           <View style={styles.totalRow}>
             <Text style={styles.totalLabel}>Total</Text>
-            <Text style={styles.totalAmount}>{formatCurrency(calculateTotal())}</Text>
+            <Text style={styles.totalAmount}>{formatCurrency(calculateTotal().toString())}</Text>
           </View>
         </View>
       )}

@@ -31,21 +31,24 @@ export const useProviderStore = create<ProviderStore>((set, get) => ({
         throw new Error(error);
       }
       if (data) {
-        set(state => ({
+        set((state) => ({
           providers: [...state.providers, data],
-          loading: false
+          loading: false,
         }));
       } else {
         throw new Error('No data returned from API');
       }
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : 'Failed to create provider', loading: false });
+      set({
+        error: error instanceof Error ? error.message : 'Failed to create provider',
+        loading: false,
+      });
       throw error;
     }
   },
 
   getProviderById: async (id) => {
-    const cachedProvider = get().providers.find(p => p.id === id);
+    const cachedProvider = get().providers.find((p) => p.id === id);
     if (cachedProvider) return cachedProvider;
 
     try {
