@@ -1,5 +1,6 @@
 {
-  "name": "veggie-bill",
+  "name": "freshbooks",
+  "slug": "FreshBooks",
   "version": "1.0.0",
   "main": "expo-router/entry",
   "scripts": {
@@ -37,7 +38,8 @@
     "react-native-screens": "3.31.1",
     "react-native-web": "~0.19.10",
     "zustand": "^5.0.0",
-    "@react-native-picker/picker": "2.7.5"
+    "@react-native-picker/picker": "2.7.5",
+    "expo-updates": "~0.25.27"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
