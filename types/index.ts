@@ -47,8 +47,13 @@ export interface VegetableItem {
   name: string;
   quantity: number;
   price: number;
-  item_total: number;
+  item_total?: number;
   isAvailable?: boolean;
+}
+export interface Vegetables {
+  id: string;
+  name: string;
+  isAvailable: boolean;
 }
 
 /**
@@ -60,7 +65,7 @@ export interface Bill {
   providerName: string;
   items: VegetableItem[];
   signer: string;
-  total: string;
+  total: number;
   created_at: Date;
   date: Date;
 }
@@ -68,7 +73,7 @@ export interface Bill {
 export interface CreateBillDTO {
   providerId: string;
   providerName: string;
-  items: Omit<VegetableItem, 'isAvailable'>[];
+  items: VegetableItem[];
   total: number;
   signer: string;
   date: Date;
@@ -87,7 +92,7 @@ export interface Provider {
 
 export interface CreateProviderDTO {
   name: string;
-  contact: string;
+  mobile: string;
   address: string;
 }
 

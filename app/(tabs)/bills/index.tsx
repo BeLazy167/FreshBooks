@@ -1,14 +1,14 @@
 // app/(tabs)/bills/index.tsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Stack, router } from 'expo-router';
-import { ScrollView, StyleSheet, View, ActivityIndicator } from 'react-native';
+import { ScrollView, StyleSheet, View, ActivityIndicator, RefreshControl } from 'react-native';
 import { Container } from '~/components/Container';
 import { BillHeader } from '~/components/bills/BillHeader';
 import { BillSearch } from '~/components/bills/BillSearch';
 import { BillFilter } from '~/components/bills/BillFilter';
 import { BillList } from '~/components/bills/BillList';
 import { EmptyState } from '~/components/bills/EmptyState';
-import BillFromId from '~/components/bills/BillFromId';
+import { BillFromId } from '~/components/bills/BillFromId';
 import { useBillStore } from '~/app/store/bills';
 import type { Bill } from '~/types';
 
@@ -16,12 +16,20 @@ export default function BillsScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'date' | 'amount'>('date');
   const [selectedBillId, setSelectedBillId] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [refreshing, setRefreshing] = useState(false);
 
   const { bills, loading, error, fetchBills } = useBillStore();
 
   useEffect(() => {
     fetchBills();
   }, []);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchBills();
+    setRefreshing(false);
+  }, [fetchBills]);
 
   const handleBillPress = (bill: Bill) => {
     setSelectedBillId(bill.id);
@@ -38,13 +46,19 @@ export default function BillsScreen() {
   const filteredBills = bills
     .filter((bill) => bill.providerName.toLowerCase().includes(searchQuery.toLowerCase()))
     .sort((a, b) => {
+      const multiplier = sortDirection === 'desc' ? 1 : -1;
       if (sortBy === 'date') {
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        return multiplier * (new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
       }
-      return Number(b.total) - Number(a.total);
+      return multiplier * (Number(b.total) - Number(a.total));
     });
 
-  if (loading) {
+  const handleSortChange = (newSort: { option: 'date' | 'amount'; direction: 'asc' | 'desc' }) => {
+    setSortBy(newSort.option);
+    setSortDirection(newSort.direction);
+  };
+
+  if (loading && !refreshing) {
     return (
       <Container>
         <View style={styles.centered}>
@@ -54,7 +68,7 @@ export default function BillsScreen() {
     );
   }
 
-  if (error) {
+  if (error && !refreshing) {
     return (
       <Container>
         <View style={styles.centered}>
@@ -67,12 +81,18 @@ export default function BillsScreen() {
   return (
     <Container>
       <Stack.Screen options={{ headerShown: false }} />
-      <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        style={styles.container}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         <BillHeader count={filteredBills.length} onAddPress={handleAddBill} />
 
         <View style={styles.searchFilters}>
           <BillSearch value={searchQuery} onChangeText={setSearchQuery} />
-          <BillFilter sortBy={sortBy} onSortChange={setSortBy} />
+          <BillFilter
+            sortState={{ option: sortBy, direction: sortDirection }}
+            onSortChange={handleSortChange}
+          />
         </View>
 
         {filteredBills.length > 0 ? (

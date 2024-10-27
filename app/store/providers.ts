@@ -1,6 +1,6 @@
 // store/providers.ts
 import { create } from 'zustand';
-import type { Provider } from '~/types';
+import type { CreateProviderDTO, Provider } from '~/types';
 import { ProviderAPI } from '~/app/services/api';
 
 interface ProviderStore {
@@ -8,7 +8,7 @@ interface ProviderStore {
   loading: boolean;
   error: string | null;
   fetchProviders: () => Promise<void>;
-  createProvider: (provider: Omit<Provider, 'id'>) => Promise<void>;
+  createProvider: (provider: CreateProviderDTO) => Promise<void>;
   getProviderById: (id: string) => Promise<Provider | undefined>;
 }
 
@@ -26,13 +26,13 @@ export const useProviderStore = create<ProviderStore>((set, get) => ({
   createProvider: async (provider) => {
     set({ loading: true, error: null });
     try {
-      const { data, error } = await ProviderAPI.create(provider);
+      const { data, error } = await ProviderAPI.create(provider as CreateProviderDTO);
       if (error) {
         throw new Error(error);
       }
       if (data) {
         set((state) => ({
-          providers: [...state.providers, data],
+          providers: data ? [data, ...state.providers] : state.providers,
           loading: false,
         }));
       } else {

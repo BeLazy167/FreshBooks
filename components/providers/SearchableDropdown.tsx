@@ -20,7 +20,7 @@ import { Feather } from '@expo/vector-icons';
 interface SearchableDropdownProps {
   data: Array<{ id: string; name: string }>;
   value: string;
-  onSelect: (value: string) => void;
+  onSelect: (value: { id: string; name: string }) => void;
   placeholder?: string;
 }
 
@@ -66,8 +66,8 @@ export function SearchableDropdown({
     }).start(() => setIsOpen(false));
   };
 
-  const handleSelect = (selectedName: string) => {
-    onSelect(selectedName);
+  const handleSelect = (selectedData: { id: string; name: string }) => {
+    onSelect(selectedData);
     closeModal();
   };
 
@@ -123,7 +123,7 @@ export function SearchableDropdown({
               renderItem={({ item }) => (
                 <TouchableOpacity
                   style={[styles.optionItem, value === item.name && styles.selectedOption]}
-                  onPress={() => handleSelect(item.name)}>
+                  onPress={() => handleSelect({ id: item.id, name: item.name })}>
                   <Text
                     style={[styles.optionText, value === item.name && styles.selectedOptionText]}>
                     {item.name}

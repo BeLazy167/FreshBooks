@@ -8,7 +8,7 @@ export interface BillStore {
   loading: boolean;
   error: string | null;
   fetchBills: () => Promise<void>;
-  createBill: (bill: Omit<Bill, 'id' | 'date'>) => Promise<void>;
+  createBill: (bill: Bill) => Promise<void>;
   getBillById: (id: string) => Promise<Bill | undefined>;
   updateBill: (id: string, updates: Partial<Omit<Bill, 'id'>>) => Promise<void>;
 }
@@ -34,9 +34,9 @@ export const useBillStore = create<BillStore>((set, get) => ({
     try {
       const { data, error } = await BillAPI.create(bill);
       if (error) throw new Error(error);
-      set(state => ({
-        bills: data ? [...state.bills, data] : state.bills,
-        loading: false
+      set((state) => ({
+        bills: data ? [data, ...state.bills] : state.bills,
+        loading: false,
       }));
     } catch (error) {
       set({ error: 'Failed to create bill', loading: false });
@@ -46,7 +46,7 @@ export const useBillStore = create<BillStore>((set, get) => ({
 
   getBillById: async (id): Promise<Bill | undefined> => {
     // First try to find in local state
-    const cachedBill = get().bills.find(b => b.id === id);
+    const cachedBill = get().bills.find((b) => b.id === id);
     if (cachedBill) return cachedBill;
 
     // If not found, fetch from API
@@ -64,9 +64,9 @@ export const useBillStore = create<BillStore>((set, get) => ({
     try {
       const { data, error } = await BillAPI.update(id, updates);
       if (error) throw new Error(error);
-      set(state => ({
-        bills: state.bills.map(b => b.id === id ? { ...b, ...data } : b),
-        loading: false
+      set((state) => ({
+        bills: state.bills.map((b) => (b.id === id ? { ...b, ...data } : b)),
+        loading: false,
       }));
     } catch (error) {
       set({ error: 'Failed to update bill', loading: false });

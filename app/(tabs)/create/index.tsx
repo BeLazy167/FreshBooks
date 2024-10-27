@@ -4,16 +4,20 @@ import { Stack, router } from 'expo-router';
 import { Container } from '~/components/Container';
 import { BillForm } from '~/components/bills/BillForm';
 import type { Bill, CreateBillDTO } from '~/types';
-import { generateId } from '~/utils';
-
+import { useBillStore } from '~/app/store/bills';
 export default function CreateBillScreen() {
+  const { createBill } = useBillStore();
   const handleCreateBill = (billData: CreateBillDTO) => {
-    // In a real app, this would save to a database
-    const newBill: CreateBillDTO = {
+    const newBill: Bill = {
       ...billData,
+      id: '',
+      date: new Date(),
+      created_at: new Date(),
     };
 
     console.log('Created bill:', newBill);
+
+    createBill(newBill);
 
     // Navigate back to bills list
     router.push('/bills');
