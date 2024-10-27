@@ -6,7 +6,7 @@ import { BillForm } from '~/components/bills/BillForm';
 import type { Bill, CreateBillDTO } from '~/types';
 import { useBillStore } from '~/app/store/bills';
 export default function CreateBillScreen() {
-  const { createBill, refetchAndReset } = useBillStore();
+  const { createBill } = useBillStore();
   const handleCreateBill = (billData: CreateBillDTO) => {
     const newBill: Bill = {
       ...billData,
@@ -19,8 +19,6 @@ export default function CreateBillScreen() {
 
     createBill(newBill);
 
-    //reset zustand store
-    refetchAndReset();
     // Navigate back to bills list
     router.push('/bills');
   };

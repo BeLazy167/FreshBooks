@@ -1,7 +1,7 @@
 // app/(tabs)/bills/index.tsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Stack, router } from 'expo-router';
-import { ScrollView, StyleSheet, View, ActivityIndicator } from 'react-native';
+import { ScrollView, StyleSheet, View, ActivityIndicator, RefreshControl } from 'react-native';
 import { Container } from '~/components/Container';
 import { BillHeader } from '~/components/bills/BillHeader';
 import { BillSearch } from '~/components/bills/BillSearch';
@@ -17,12 +17,19 @@ export default function BillsScreen() {
   const [sortBy, setSortBy] = useState<'date' | 'amount'>('date');
   const [selectedBillId, setSelectedBillId] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [refreshing, setRefreshing] = useState(false);
 
   const { bills, loading, error, fetchBills } = useBillStore();
 
   useEffect(() => {
     fetchBills();
   }, []);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchBills();
+    setRefreshing(false);
+  }, [fetchBills]);
 
   const handleBillPress = (bill: Bill) => {
     setSelectedBillId(bill.id);
@@ -51,7 +58,7 @@ export default function BillsScreen() {
     setSortDirection(newSort.direction);
   };
 
-  if (loading) {
+  if (loading && !refreshing) {
     return (
       <Container>
         <View style={styles.centered}>
@@ -61,7 +68,7 @@ export default function BillsScreen() {
     );
   }
 
-  if (error) {
+  if (error && !refreshing) {
     return (
       <Container>
         <View style={styles.centered}>
@@ -74,7 +81,10 @@ export default function BillsScreen() {
   return (
     <Container>
       <Stack.Screen options={{ headerShown: false }} />
-      <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        style={styles.container}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         <BillHeader count={filteredBills.length} onAddPress={handleAddBill} />
 
         <View style={styles.searchFilters}>

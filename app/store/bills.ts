@@ -11,7 +11,6 @@ export interface BillStore {
   createBill: (bill: Bill) => Promise<void>;
   getBillById: (id: string) => Promise<Bill | undefined>;
   updateBill: (id: string, updates: Partial<Omit<Bill, 'id'>>) => Promise<void>;
-  refetchAndReset: () => void;
 }
 
 export const useBillStore = create<BillStore>((set, get) => ({
@@ -73,9 +72,5 @@ export const useBillStore = create<BillStore>((set, get) => ({
       set({ error: 'Failed to update bill', loading: false });
       throw error;
     }
-  },
-  refetchAndReset: () => {
-    set({ bills: [], loading: false, error: null });
-    get().fetchBills();
   },
 }));

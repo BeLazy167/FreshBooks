@@ -8,21 +8,26 @@ import { EmptyState } from '~/components/providers/EmptyState';
 import type { Provider } from '~/types';
 import { useProviderStore } from '~/app/store/providers';
 import { useEffect } from 'react';
+import { useState } from 'react';
+import { ProviderForm } from '~/components/providers/ProviderForm';
+import { ProviderDetails } from '~/components/providers/ProviderDetails';
+
 export default function ProvidersScreen() {
   const { providers, loading, error, fetchProviders } = useProviderStore();
+  const [showProviderForm, setShowProviderForm] = useState(false);
+  const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
 
   useEffect(() => {
     fetchProviders();
   }, []);
 
   const handleAddProvider = () => {
-    // Navigate to add provider screen
-    console.log('Add provider');
+    // open modal to create provider
+    setShowProviderForm(true);
   };
 
   const handleProviderPress = (provider: Provider) => {
-    // Navigate to provider details
-    console.log('Provider pressed:', provider.id);
+    setSelectedProvider(provider.id);
   };
 
   return (
@@ -36,6 +41,7 @@ export default function ProvidersScreen() {
       />
       <Container>
         <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
+          <ProviderForm visible={showProviderForm} onClose={() => setShowProviderForm(false)} />
           <ProviderHeader count={providers.length} onAddPress={handleAddProvider} />
 
           {providers.length > 0 ? (
@@ -51,6 +57,11 @@ export default function ProvidersScreen() {
           ) : (
             <EmptyState onAddPress={handleAddProvider} />
           )}
+          <ProviderDetails
+            visible={!!selectedProvider}
+            id={selectedProvider || ''}
+            onClose={() => setSelectedProvider(null)}
+          />
         </ScrollView>
       </Container>
     </>

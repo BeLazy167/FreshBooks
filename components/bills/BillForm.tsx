@@ -25,11 +25,7 @@ interface ItemInputProps {
     quantity: number;
     price: number;
   };
-  onItemChange: (item: {
-    name: string;
-    quantity: number;
-    price: number;
-  }) => void;
+  onItemChange: (item: { name: string; quantity: number; price: number }) => void;
   onAddItem: () => void;
 }
 
@@ -56,9 +52,7 @@ const ItemInput = ({ currentItem, onItemChange, onAddItem }: ItemInputProps) => 
           <TextInput
             style={[styles.input, styles.smallInput]}
             value={currentItem.quantity.toString()}
-            onChangeText={(text) => 
-              onItemChange({ ...currentItem, quantity: Number(text) || 0 })
-            }
+            onChangeText={(text) => onItemChange({ ...currentItem, quantity: Number(text) || 0 })}
             placeholder="Qty"
             keyboardType="numeric"
             placeholderTextColor="#A0AEC0"
@@ -71,9 +65,7 @@ const ItemInput = ({ currentItem, onItemChange, onAddItem }: ItemInputProps) => 
           <TextInput
             style={[styles.input, styles.smallInput]}
             value={currentItem.price.toString()}
-            onChangeText={(text) => 
-              onItemChange({ ...currentItem, price: Number(text) || 0 })
-            }
+            onChangeText={(text) => onItemChange({ ...currentItem, price: Number(text) || 0 })}
             placeholder="Price"
             keyboardType="numeric"
             placeholderTextColor="#A0AEC0"
@@ -113,10 +105,7 @@ const ItemsList = ({ items, onRemoveItem, total }: ItemsListProps) => {
             <Text style={styles.itemTotal}>
               {formatCurrency((item.quantity * item.price).toString())}
             </Text>
-            <TouchableOpacity 
-              style={styles.removeButton} 
-              onPress={() => onRemoveItem(index)}
-            >
+            <TouchableOpacity style={styles.removeButton} onPress={() => onRemoveItem(index)}>
               <Feather name="x" size={16} color="white" />
             </TouchableOpacity>
           </View>
@@ -134,6 +123,7 @@ const ItemsList = ({ items, onRemoveItem, total }: ItemsListProps) => {
 export function BillForm({ onSubmit }: BillFormProps) {
   const { providers, fetchProviders } = useProviderStore();
   const [providerData, setProviderData] = useState({ id: '', name: '' });
+  const [signer, setSigner] = useState('');
   const [items, setItems] = useState<Omit<VegetableItem, 'id'>[]>([]);
   const [currentItem, setCurrentItem] = useState({
     name: '',
@@ -165,18 +155,24 @@ export function BillForm({ onSubmit }: BillFormProps) {
   }, []);
 
   const total = useMemo(() => {
-    return items.reduce((sum: number, item: Omit<VegetableItem, 'id'>) => sum + item.quantity * item.price, 0);
+    return items.reduce(
+      (sum: number, item: Omit<VegetableItem, 'id'>) => sum + item.quantity * item.price,
+      0
+    );
   }, [items]);
 
   const handleSubmit = useCallback(() => {
     if (providerData.id && items.length > 0) {
       onSubmit({
-        items: items.map((item: Omit<VegetableItem, 'id'>, index: number) => ({ ...item, id: index.toString() })),
+        items: items.map((item: Omit<VegetableItem, 'id'>, index: number) => ({
+          ...item,
+          id: index.toString(),
+        })),
         total,
         providerId: providerData.id,
         providerName: providerData.name,
-        signer: 'DK',
         date: new Date(),
+        signer,
       });
       setProviderData({ id: '', name: '' });
       setItems([]);
@@ -188,7 +184,7 @@ export function BillForm({ onSubmit }: BillFormProps) {
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <Text style={styles.title}>Create Bill</Text>
-      
+
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Provider Name</Text>
         <SearchableDropdown
@@ -201,21 +197,20 @@ export function BillForm({ onSubmit }: BillFormProps) {
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Add Item</Text>
-        <ItemInput
-          currentItem={currentItem}
-          onItemChange={setCurrentItem}
-          onAddItem={addItem}
-        />
+        <ItemInput currentItem={currentItem} onItemChange={setCurrentItem} onAddItem={addItem} />
       </View>
 
-      {items.length > 0 && (
-        <ItemsList
-          items={items}
-          onRemoveItem={removeItem}
-          total={total}
-        />
-      )}
+      {items.length > 0 && <ItemsList items={items} onRemoveItem={removeItem} total={total} />}
 
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Signer</Text>
+        <TextInput
+          style={styles.input}
+          value={signer}
+          onChangeText={(text) => setSigner(text)}
+          placeholder="Signer"
+        />
+      </View>
       <TouchableOpacity
         style={[styles.submitButton, isSubmitDisabled && styles.submitButtonDisabled]}
         onPress={handleSubmit}
@@ -279,12 +274,11 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     opacity: 0.3,
-    
   },
   inputLabelFocus: {
     opacity: 0,
   },
-  
+
   input: {
     padding: 16,
     fontSize: 16,

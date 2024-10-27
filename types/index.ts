@@ -92,7 +92,7 @@ export interface Provider {
 
 export interface CreateProviderDTO {
   name: string;
-  contact: string;
+  mobile: string;
   address: string;
 }
 
