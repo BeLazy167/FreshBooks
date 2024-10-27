@@ -29,13 +29,15 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.belazy.FreshBooks"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#299737"
-      }
+      },
+      "package": "com.belazy.FreshBooks"
     },
     "extra": {
       "eas": {
