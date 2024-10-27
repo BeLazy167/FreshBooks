@@ -6,17 +6,21 @@ import { BillForm } from '~/components/bills/BillForm';
 import type { Bill, CreateBillDTO } from '~/types';
 import { useBillStore } from '~/app/store/bills';
 export default function CreateBillScreen() {
-  const { createBill } = useBillStore();
+  const { createBill, refetchAndReset } = useBillStore();
   const handleCreateBill = (billData: CreateBillDTO) => {
-    const newBill: Omit<Bill, 'id' | 'created_at' | 'date'> = {
+    const newBill: Bill = {
       ...billData,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      created_at: new Date(),
+      id: '',
       date: new Date(),
+      created_at: new Date(),
     };
 
     console.log('Created bill:', newBill);
+
     createBill(newBill);
+
+    //reset zustand store
+    refetchAndReset();
     // Navigate back to bills list
     router.push('/bills');
   };
