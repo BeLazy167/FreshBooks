@@ -1,3 +1,4 @@
+import { Feather } from '@expo/vector-icons';
 import React, { useState, useEffect, useCallback, memo } from 'react';
 import {
   ScrollView,
@@ -7,14 +8,13 @@ import {
   TouchableOpacity,
   Text,
   ActivityIndicator,
-  type LayoutAnimation,
   Platform,
   UIManager,
 } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+
+import { useBillStore, type BillStore } from '~/app/store/bills';
 import { Container } from '~/components/Container';
 import { BillDetail } from '~/components/bills/BillDetail';
-import { useBillStore, type BillStore } from '~/app/store/bills';
 import type { Bill } from '~/types';
 
 // Enable LayoutAnimation for Android
@@ -134,7 +134,7 @@ export const BillFromId = memo(({ id, onClose, visible }: BillFromIdProps) => {
   return (
     <Modal
       animationType="slide"
-      transparent={true}
+      transparent
       visible={visible}
       onRequestClose={onClose}
       statusBarTranslucent>

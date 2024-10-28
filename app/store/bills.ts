@@ -1,7 +1,8 @@
 // store/bills.ts
 import { create } from 'zustand';
-import type { Bill } from '~/types';
+
 import { BillAPI } from '~/app/services/api';
+import type { Bill } from '~/types';
 
 export interface BillStore {
   bills: Bill[];

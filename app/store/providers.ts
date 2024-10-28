@@ -1,7 +1,8 @@
 // store/providers.ts
 import { create } from 'zustand';
-import type { CreateProviderDTO, Provider } from '~/types';
+
 import { ProviderAPI } from '~/app/services/api';
+import type { CreateProviderDTO, Provider } from '~/types';
 
 interface ProviderStore {
   providers: Provider[];

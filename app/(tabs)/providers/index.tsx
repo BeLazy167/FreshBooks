@@ -1,70 +1,127 @@
 // app/(tabs)/providers/index.tsx
 import { Stack } from 'expo-router';
-import { ScrollView, View, StyleSheet } from 'react-native';
-import { Container } from '~/components/Container';
-import { ProviderCard } from '~/components/providers/ProviderCard';
-import { ProviderHeader } from '~/components/providers/ProviderHeader';
-import { EmptyState } from '~/components/providers/EmptyState';
-import type { Provider } from '~/types';
+import { useEffect, useState, useCallback } from 'react';
+import { ScrollView, View, StyleSheet, ActivityIndicator, RefreshControl } from 'react-native';
+
 import { useProviderStore } from '~/app/store/providers';
-import { useEffect } from 'react';
-import { useState } from 'react';
-import { ProviderForm } from '~/components/providers/ProviderForm';
+import { Container } from '~/components/Container';
+import { EmptyState } from '~/components/providers/EmptyState';
+import { ProviderCard } from '~/components/providers/ProviderCard';
 import { ProviderDetails } from '~/components/providers/ProviderDetails';
+import { ProviderForm } from '~/components/providers/ProviderForm';
+import { ProviderHeader } from '~/components/providers/ProviderHeader';
+import type { Provider } from '~/types';
 
 export default function ProvidersScreen() {
+  // State
   const { providers, loading, error, fetchProviders } = useProviderStore();
   const [showProviderForm, setShowProviderForm] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
+  // Initial fetch
   useEffect(() => {
-    fetchProviders();
+    fetchProviders().catch(console.error);
   }, []);
 
-  const handleAddProvider = () => {
-    // open modal to create provider
-    setShowProviderForm(true);
-  };
+  // Handlers
+  const handleRefresh = useCallback(async () => {
+    try {
+      setRefreshing(true);
+      await fetchProviders();
+    } catch (err) {
+      console.error('Error refreshing providers:', err);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [fetchProviders]);
 
-  const handleProviderPress = (provider: Provider) => {
+  const handleAddProvider = useCallback(() => {
+    setShowProviderForm(true);
+  }, []);
+
+  const handleProviderPress = useCallback((provider: Provider) => {
     setSelectedProvider(provider.id);
-  };
+  }, []);
+
+  const handleCloseForm = useCallback(() => {
+    setShowProviderForm(false);
+  }, []);
+
+  const handleCloseDetails = useCallback(() => {
+    setSelectedProvider(null);
+  }, []);
+
+  // Loading state
+  if (loading && !refreshing) {
+    return (
+      <Container>
+        <Stack.Screen options={{ title: 'Providers' }} />
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color="#007AFF" />
+        </View>
+      </Container>
+    );
+  }
+
+  // Error state
+  if (error && !refreshing) {
+    return (
+      <Container>
+        <Stack.Screen />
+        <View style={styles.centered}>
+          <EmptyState onAddPress={handleAddProvider} error={error} onRetry={fetchProviders} />
+        </View>
+      </Container>
+    );
+  }
 
   return (
-    <>
-      <Stack.Screen
-        options={{
-          title: 'Providers',
-          headerStyle: { backgroundColor: '#fff' },
-          headerShadowVisible: false,
+    <Container>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        style={styles.container}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={['#007AFF']} />
+        }>
+        <ProviderHeader count={providers.length} onAddPress={handleAddProvider} />
+
+        {providers.length > 0 ? (
+          <View style={styles.list}>
+            {providers.map((provider) => (
+              <ProviderCard
+                key={provider.id}
+                provider={provider}
+                onPress={() => handleProviderPress(provider)}
+              />
+            ))}
+          </View>
+        ) : (
+          <EmptyState onAddPress={handleAddProvider} isLoading={loading} />
+        )}
+      </ScrollView>
+
+      <ProviderForm
+        visible={showProviderForm}
+        onClose={handleCloseForm}
+        onSuccess={() => {
+          handleCloseForm();
+          fetchProviders();
         }}
       />
-      <Container>
-        <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
-          <ProviderForm visible={showProviderForm} onClose={() => setShowProviderForm(false)} />
-          <ProviderHeader count={providers.length} onAddPress={handleAddProvider} />
 
-          {providers.length > 0 ? (
-            <View style={styles.list}>
-              {providers.map((provider) => (
-                <ProviderCard
-                  key={provider.id}
-                  provider={provider}
-                  onPress={() => handleProviderPress(provider)}
-                />
-              ))}
-            </View>
-          ) : (
-            <EmptyState onAddPress={handleAddProvider} />
-          )}
-          <ProviderDetails
-            visible={!!selectedProvider}
-            id={selectedProvider || ''}
-            onClose={() => setSelectedProvider(null)}
-          />
-        </ScrollView>
-      </Container>
-    </>
+      {selectedProvider && (
+        <ProviderDetails
+          visible
+          id={selectedProvider}
+          onClose={handleCloseDetails}
+          onDelete={() => {
+            handleCloseDetails();
+            fetchProviders();
+          }}
+        />
+      )}
+    </Container>
   );
 }
 
@@ -75,5 +132,10 @@ const styles = StyleSheet.create({
   },
   list: {
     gap: 12,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

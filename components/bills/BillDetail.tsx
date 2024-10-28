@@ -1,4 +1,9 @@
+import { Feather } from '@expo/vector-icons';
+import * as Print from 'expo-print';
+import * as Sharing from 'expo-sharing';
+import { useState } from 'react';
 import {
+  Share,
   View,
   Text,
   TouchableOpacity,
@@ -7,13 +12,9 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+
 import type { Bill } from '~/types';
 import { formatCurrency } from '~/utils';
-import { Share } from 'react-native';
-import * as Print from 'expo-print';
-import * as Sharing from 'expo-sharing';
-import { useState } from 'react';
 
 interface BillDetailProps {
   bill: Bill;
@@ -203,7 +204,6 @@ Thank you for your business!`;
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <View style={styles.providerInfo}>
-            
             <View>
               <Text style={styles.providerName}>{bill.providerName}</Text>
               <Text style={styles.date}>{new Date(bill.date).toLocaleDateString()}</Text>

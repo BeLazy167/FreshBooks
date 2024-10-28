@@ -1,5 +1,6 @@
 // hooks/useVegetableSuggestions.ts
 import { useState, useCallback, useRef, useEffect } from 'react';
+
 import { useVegetableStore } from '~/app/store/vegetables';
 import { Vegetables } from '~/types';
 
@@ -16,38 +17,42 @@ export function useVegetableSuggestions() {
     }
   }, []);
 
-  const filterVegetables = useCallback((query: string) => {
-    if (!query || query.length < 2) {
-      setSuggestions([]);
-      return;
-    }
+  const filterVegetables = useCallback(
+    (query: string) => {
+      if (!query || query.length < 2) {
+        setSuggestions([]);
+        return;
+      }
 
-    const filtered = vegetables
-      .filter((veg: Vegetables) => 
-        veg.name.toLowerCase().includes(query.toLowerCase())
-      )
-      .map((veg: Vegetables) => ({
-        id: veg.id,
-        name: veg.name,
-        isAvailable: veg.isAvailable, // Add this line
-      }));
+      const filtered = vegetables
+        .filter((veg: Vegetables) => veg.name.toLowerCase().includes(query.toLowerCase()))
+        .map((veg: Vegetables) => ({
+          id: veg.id,
+          name: veg.name,
+          isAvailable: veg.isAvailable, // Add this line
+        }));
 
-    setSuggestions(filtered);
-  }, [vegetables]);
+      setSuggestions(filtered);
+    },
+    [vegetables]
+  );
 
-  const loadSuggestions = useCallback((query: string) => {
-    setSearchQuery(query);
-    
-    // Clear previous timeout
-    if (debounceTimeout.current) {
-      clearTimeout(debounceTimeout.current);
-    }
+  const loadSuggestions = useCallback(
+    (query: string) => {
+      setSearchQuery(query);
 
-    // Debounce the filter operation
-    debounceTimeout.current = setTimeout(() => {
-      filterVegetables(query);
-    }, 300);
-  }, [filterVegetables]);
+      // Clear previous timeout
+      if (debounceTimeout.current) {
+        clearTimeout(debounceTimeout.current);
+      }
+
+      // Debounce the filter operation
+      debounceTimeout.current = setTimeout(() => {
+        filterVegetables(query);
+      }, 300);
+    },
+    [filterVegetables]
+  );
 
   // Cleanup timeout on unmount
   useEffect(() => {

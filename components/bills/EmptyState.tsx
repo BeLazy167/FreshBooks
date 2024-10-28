@@ -1,11 +1,14 @@
 // components/bills/EmptyState.tsx
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 
-interface EmptyStateProps {
+type EmptyStateProps = {
   isFiltered: boolean;
-  onAddPress?: () => void;
-}
+  onAddPress: () => void;
+  onClearFilter?: () => void;
+  error?: Error | string;
+  onRetry?: () => void;
+};
 
 export function EmptyState({ isFiltered, onAddPress }: EmptyStateProps) {
   return (

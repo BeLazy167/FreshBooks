@@ -1,3 +1,4 @@
+import { Feather } from '@expo/vector-icons';
 import React, { useCallback, useState } from 'react';
 import {
   View,
@@ -6,26 +7,25 @@ import {
   TouchableOpacity,
   FlatList,
   ActivityIndicator,
+  StyleSheet,
+  Platform,
 } from 'react-native';
-import { Feather } from '@expo/vector-icons';
-import { formatCurrency } from '~/utils';
-import { StyleSheet, Platform } from 'react-native';
-import { useVegetableSuggestions } from '~/hooks/useVegetableSuggestions';
+
 import { useVegetableStore } from '~/app/store/vegetables';
-import { Vegetables } from '~/types';
-interface VegetableAutocompleteProps {  
-    value: Vegetables;
+import { useVegetableSuggestions } from '~/hooks/useVegetableSuggestions';
+import type { Vegetables } from '~/types';
+
+type VegetableAutocompleteProps = {
+  value: Vegetables;
   onChange: (value: Vegetables) => void;
   onSubmit: () => void;
-}
-export function VegetableAutocomplete({
-  value,
-  onChange,
-  onSubmit,
-}: VegetableAutocompleteProps) {
+};
+
+export function VegetableAutocomplete({ value, onChange, onSubmit }: VegetableAutocompleteProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const { suggestions, loading, error, loadSuggestions, clearSuggestions, searchQuery } = useVegetableSuggestions();
-  const createVegetable = useVegetableStore(state => state.createVegetable);
+  const { suggestions, loading, error, loadSuggestions, clearSuggestions, searchQuery } =
+    useVegetableSuggestions();
+  const createVegetable = useVegetableStore((state) => state.createVegetable);
 
   const handleNameChange = useCallback(
     async (text: string) => {
@@ -53,7 +53,7 @@ export function VegetableAutocomplete({
 
     // If the vegetable doesn't exist in suggestions, create it
     const vegetableExists = suggestions.some(
-      s => s.name.toLowerCase() === value.name.toLowerCase()
+      (s) => s.name.toLowerCase() === value.name.toLowerCase()
     );
 
     if (!vegetableExists && searchQuery) {
@@ -84,11 +84,7 @@ export function VegetableAutocomplete({
 
       <View style={styles.itemInputsRow}>
         <View style={[styles.inputContainer, styles.smallInputContainer]}>
-          <TextInput
-            placeholder="Qty"
-            keyboardType="numeric"
-            placeholderTextColor="#A0AEC0"
-          />
+          <TextInput placeholder="Qty" keyboardType="numeric" placeholderTextColor="#A0AEC0" />
         </View>
 
         <View style={[styles.inputContainer, styles.smallInputContainer]}>
@@ -147,7 +143,6 @@ export function VegetableAutocomplete({
     </View>
   );
 }
-
 
 const styles = StyleSheet.create({
   container: {

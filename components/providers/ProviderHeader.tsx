@@ -1,6 +1,6 @@
 // components/providers/ProviderHeader.tsx
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 
 interface ProviderHeaderProps {
   count: number;

@@ -1,12 +1,15 @@
 // components/providers/EmptyState.tsx
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 
-interface EmptyStateProps {
+type EmptyStateProps = {
   onAddPress: () => void;
-}
+  error?: Error | string;
+  onRetry?: () => void;
+  isLoading?: boolean;
+};
 
-export function EmptyState({ onAddPress }: EmptyStateProps) {
+export function EmptyState({ onAddPress, error, onRetry, isLoading }: EmptyStateProps) {
   return (
     <View style={styles.empty}>
       <View style={styles.iconContainer}>

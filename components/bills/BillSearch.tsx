@@ -1,12 +1,12 @@
 // components/bills/BillSearch.tsx
-import { View, TextInput, StyleSheet, Platform } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { View, TextInput, StyleSheet, Platform } from 'react-native';
 
-interface BillSearchProps {
+type BillSearchProps = {
   value: string;
   onChangeText: (text: string) => void;
-}
-
+  onClear: () => void;
+};
 export function BillSearch({ value, onChangeText }: BillSearchProps) {
   return (
     <View style={styles.searchBar}>

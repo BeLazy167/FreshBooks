@@ -1,6 +1,7 @@
 /**
  * Custom SearchableDropdown component for React Native
  */
+import { Feather } from '@expo/vector-icons';
 import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
@@ -15,10 +16,9 @@ import {
   Keyboard,
   Platform,
 } from 'react-native';
-import { Feather } from '@expo/vector-icons';
 
 interface SearchableDropdownProps {
-  data: Array<{ id: string; name: string }>;
+  data: { id: string; name: string }[];
   value: string;
   onSelect: (value: { id: string; name: string }) => void;
   placeholder?: string;

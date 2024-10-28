@@ -1,6 +1,6 @@
+import { MaterialIcons } from '@expo/vector-icons';
 import React, { useCallback, memo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
 
 type FilterOption = 'date' | 'amount';
 type SortDirection = 'asc' | 'desc';

@@ -9,10 +9,12 @@ import {
   ScrollView,
   Platform,
 } from 'react-native';
+
+import { SearchableDropdown } from '../providers/SearchableDropdown';
+
 import { useProviderStore } from '~/app/store/providers';
 import type { CreateBillDTO, VegetableItem } from '~/types';
 import { formatCurrency } from '~/utils';
-import { SearchableDropdown } from '../providers/SearchableDropdown';
 
 interface BillFormProps {
   onSubmit: (bill: CreateBillDTO) => void;

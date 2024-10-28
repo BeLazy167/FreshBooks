@@ -1,6 +1,7 @@
 // components/providers/ProviderCard.tsx
-import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+
 import type { Provider } from '~/types';
 
 interface ProviderCardProps {

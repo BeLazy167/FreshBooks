@@ -1,13 +1,14 @@
 import { create } from 'zustand';
-import type { Vegetables } from '~/types';
+
 import { VegetableAPI } from '~/app/services/api';
+import type { Vegetables } from '~/types';
 
 interface VegetableStore {
   vegetables: Vegetables[];
   error?: Error | null;
   fetchVegetables: () => Promise<void>;
   createVegetable: (vegetable: Omit<Vegetables, 'id'>) => Promise<void>;
-  loading: boolean
+  loading: boolean;
 }
 
 export const useVegetableStore = create<VegetableStore>((set) => ({
@@ -27,8 +28,4 @@ export const useVegetableStore = create<VegetableStore>((set) => ({
     }
     set({ loading: false });
   },
-
 }));
-
-
-

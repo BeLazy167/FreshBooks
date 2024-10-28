@@ -1,3 +1,4 @@
+import { Feather } from '@expo/vector-icons';
 import React, { useState, useEffect, useCallback, memo } from 'react';
 import {
   ScrollView,
@@ -9,16 +10,17 @@ import {
   ActivityIndicator,
   Platform,
 } from 'react-native';
-import { Feather } from '@expo/vector-icons';
-import { Container } from '~/components/Container';
+
 import { useProviderStore } from '~/app/store/providers';
+import { Container } from '~/components/Container';
 import type { Provider } from '~/types';
 
-interface ProviderDetailsProps {
+type ProviderDetailsProps = {
+  visible: boolean;
   id: string;
   onClose: () => void;
-  visible: boolean;
-}
+  onDelete?: () => void;
+};
 
 const LoadingState = memo(({ size = 24, color = '#007AFF' }: { size?: number; color?: string }) => (
   <View style={styles.loadingContainer}>

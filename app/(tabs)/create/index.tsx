@@ -1,10 +1,10 @@
 // app/(tabs)/bills/create.tsx
-import { Stack, router } from 'expo-router';
+import { router } from 'expo-router';
 
+import { useBillStore } from '~/app/store/bills';
 import { Container } from '~/components/Container';
 import { BillForm } from '~/components/bills/BillForm';
 import type { Bill, CreateBillDTO } from '~/types';
-import { useBillStore } from '~/app/store/bills';
 export default function CreateBillScreen() {
   const { createBill } = useBillStore();
   const handleCreateBill = (billData: CreateBillDTO) => {
@@ -20,18 +20,11 @@ export default function CreateBillScreen() {
     createBill(newBill);
 
     // Navigate back to bills list
-    router.push('/bills');
+    router.navigate('/bills');
   };
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          title: 'Create Bill',
-          headerStyle: { backgroundColor: '#fff' },
-          headerShadowVisible: false,
-        }}
-      />
       <Container>
         <BillForm onSubmit={handleCreateBill} />
       </Container>

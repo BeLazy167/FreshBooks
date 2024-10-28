@@ -32,11 +32,11 @@ export interface ApiResponse<T> {
 
 export interface ValidationError {
   error: 'Validation error';
-  details: Array<{
+  details: {
     code: string;
     message: string;
     path: string[];
-  }>;
+  }[];
 }
 
 /**

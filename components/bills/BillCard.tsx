@@ -1,8 +1,7 @@
-
-
 // components/bills/BillCard.tsx
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+
 import type { Bill } from '~/types';
 import { formatCurrency } from '~/utils';
 

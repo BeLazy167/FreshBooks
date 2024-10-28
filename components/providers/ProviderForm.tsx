@@ -1,3 +1,4 @@
+import { Feather } from '@expo/vector-icons';
 import { useState } from 'react';
 import {
   View,
@@ -9,14 +10,16 @@ import {
   Platform,
   Alert,
 } from 'react-native';
-import { Feather } from '@expo/vector-icons';
-import { useProviderStore } from '~/app/store/providers';
-import type { CreateProviderDTO } from '~/types';
 
-interface ProviderFormProps {
+import { useProviderStore } from '~/app/store/providers';
+import type { CreateProviderDTO, Provider as AppProvider } from '~/types';
+
+type ProviderFormProps = {
   visible: boolean;
   onClose: () => void;
-}
+  onSuccess?: () => void;
+  initialData?: Partial<AppProvider>;
+};
 
 export function ProviderForm({ visible, onClose }: ProviderFormProps) {
   const [providerData, setProviderData] = useState({
@@ -41,7 +44,9 @@ export function ProviderForm({ visible, onClose }: ProviderFormProps) {
       setProviderData({ name: '', mobile: '', address: '' });
       onClose();
     } catch (error) {
-      Alert.alert('Error', 'Failed to create provider. Please try again.');
+      Alert.alert('Error', 'Failed to create provider. Please try again.', [
+        { text: 'OK', onPress: () => console.log('OK pressed') },
+      ]);
     } finally {
       setIsLoading(false);
     }

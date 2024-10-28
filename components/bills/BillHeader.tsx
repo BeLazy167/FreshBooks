@@ -1,6 +1,6 @@
 // components/bills/BillsHeader.tsx
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 
 interface BillHeaderProps {
   count: number;
