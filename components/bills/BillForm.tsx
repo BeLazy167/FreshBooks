@@ -20,7 +20,6 @@ interface BillFormProps {
   onSubmit: (bill: CreateBillDTO) => void;
 }
 
-// Separate the item input form into its own component for better organization
 interface ItemInputProps {
   currentItem: {
     name: string;
@@ -32,7 +31,32 @@ interface ItemInputProps {
 }
 
 const ItemInput = ({ currentItem, onItemChange, onAddItem }: ItemInputProps) => {
+  const [priceInput, setPriceInput] = useState('');
   const isDisabled = !currentItem.name || !currentItem.quantity || !currentItem.price;
+
+  const handlePriceChange = (text: string) => {
+    // Allow normal numeric input including decimals
+    const cleanedText = text.replace(/[^0-9.]/g, '');
+
+    // Ensure only one decimal point
+    const parts = cleanedText.split('.');
+    const formattedText = parts.length > 2 ? `${parts[0]}.${parts.slice(1).join('')}` : cleanedText;
+
+    setPriceInput(formattedText);
+    onItemChange({ ...currentItem, price: parseFloat(formattedText) || 0 });
+  };
+
+  const handleAddItem = () => {
+    onAddItem();
+    setPriceInput(''); // Reset price input field
+  };
+
+  // Reset price input when currentItem.price is reset to 0
+  useEffect(() => {
+    if (currentItem.price === 0) {
+      setPriceInput('');
+    }
+  }, [currentItem.price]);
 
   return (
     <>
@@ -66,17 +90,17 @@ const ItemInput = ({ currentItem, onItemChange, onAddItem }: ItemInputProps) => 
 
           <TextInput
             style={[styles.input, styles.smallInput]}
-            value={currentItem.price.toString()}
-            onChangeText={(text) => onItemChange({ ...currentItem, price: Number(text) || 0 })}
+            value={priceInput}
+            onChangeText={handlePriceChange}
             placeholder="Price"
-            keyboardType="numeric"
+            keyboardType="decimal-pad"
             placeholderTextColor="#A0AEC0"
           />
         </View>
 
         <TouchableOpacity
           style={[styles.addButton, isDisabled && styles.addButtonDisabled]}
-          onPress={onAddItem}
+          onPress={handleAddItem}
           disabled={isDisabled}>
           <Feather name="plus" size={24} color="white" />
         </TouchableOpacity>
@@ -85,7 +109,6 @@ const ItemInput = ({ currentItem, onItemChange, onAddItem }: ItemInputProps) => 
   );
 };
 
-// Separate the items list into its own component
 interface ItemsListProps {
   items: Omit<VegetableItem, 'id'>[];
   onRemoveItem: (index: number) => void;
@@ -100,12 +123,12 @@ const ItemsList = ({ items, onRemoveItem, total }: ItemsListProps) => {
           <View style={styles.flex}>
             <Text style={styles.itemName}>{item.name}</Text>
             <Text style={styles.itemDetails}>
-              {item.quantity} × {formatCurrency(item.price.toString())}
+              {item.quantity} × {formatCurrency(item.price.toFixed(2))}
             </Text>
           </View>
           <View style={styles.itemActions}>
             <Text style={styles.itemTotal}>
-              {formatCurrency((item.quantity * item.price).toString())}
+              {formatCurrency((item.quantity * item.price).toFixed(2))}
             </Text>
             <TouchableOpacity style={styles.removeButton} onPress={() => onRemoveItem(index)}>
               <Feather name="x" size={16} color="white" />
@@ -116,7 +139,7 @@ const ItemsList = ({ items, onRemoveItem, total }: ItemsListProps) => {
 
       <View style={styles.totalRow}>
         <Text style={styles.totalLabel}>Total</Text>
-        <Text style={styles.totalAmount}>{formatCurrency(total.toString())}</Text>
+        <Text style={styles.totalAmount}>{formatCurrency(total.toFixed(2))}</Text>
       </View>
     </View>
   );
@@ -141,14 +164,20 @@ export function BillForm({ onSubmit }: BillFormProps) {
 
   const addItem = useCallback(() => {
     if (currentItem.name && currentItem.quantity && currentItem.price) {
+      // Format the price to 2 decimal places only when adding to items array
+      const formattedPrice = parseFloat(currentItem.price.toFixed(2));
+
       setItems((prevItems) => [
         ...prevItems,
         {
-          ...currentItem,
-          item_total: Number(currentItem.quantity * currentItem.price),
+          name: currentItem.name,
+          quantity: currentItem.quantity,
+          price: formattedPrice,
+          item_total: parseFloat((currentItem.quantity * formattedPrice).toFixed(2)),
         },
       ]);
       setCurrentItem({ name: '', quantity: 0, price: 0 });
+      // Reset price input in ItemInput component by triggering a re-render
     }
   }, [currentItem]);
 
@@ -157,9 +186,13 @@ export function BillForm({ onSubmit }: BillFormProps) {
   }, []);
 
   const total = useMemo(() => {
-    return items.reduce(
-      (sum: number, item: Omit<VegetableItem, 'id'>) => sum + item.quantity * item.price,
-      0
+    return parseFloat(
+      items
+        .reduce(
+          (sum: number, item: Omit<VegetableItem, 'id'>) => sum + item.quantity * item.price,
+          0
+        )
+        .toFixed(2)
     );
   }, [items]);
 
@@ -178,8 +211,9 @@ export function BillForm({ onSubmit }: BillFormProps) {
       });
       setProviderData({ id: '', name: '' });
       setItems([]);
+      setSigner('');
     }
-  }, [items, providerData, total, onSubmit]);
+  }, [items, providerData, total, onSubmit, signer]);
 
   const isSubmitDisabled = !providerData.id || items.length === 0;
 
@@ -209,10 +243,12 @@ export function BillForm({ onSubmit }: BillFormProps) {
         <TextInput
           style={styles.input}
           value={signer}
-          onChangeText={(text) => setSigner(text)}
+          onChangeText={setSigner}
           placeholder="Signer"
+          placeholderTextColor="#A0AEC0"
         />
       </View>
+
       <TouchableOpacity
         style={[styles.submitButton, isSubmitDisabled && styles.submitButtonDisabled]}
         onPress={handleSubmit}
@@ -226,7 +262,6 @@ export function BillForm({ onSubmit }: BillFormProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // backgroundColor: '#F7FAFC',
     padding: 20,
   },
   title: {
@@ -277,10 +312,6 @@ const styles = StyleSheet.create({
     right: 0,
     opacity: 0.3,
   },
-  inputLabelFocus: {
-    opacity: 0,
-  },
-
   input: {
     padding: 16,
     fontSize: 16,
