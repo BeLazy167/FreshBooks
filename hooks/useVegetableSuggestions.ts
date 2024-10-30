@@ -13,7 +13,7 @@ export function useVegetableSuggestions() {
   // Fetch vegetables on mount if not already loaded
   useEffect(() => {
     if (vegetables.length === 0) {
-      fetchVegetables();
+      fetchVegetables().catch(console.error);
     }
   }, []);
 

@@ -18,7 +18,13 @@ export const useVegetableStore = create<VegetableStore>((set) => ({
   fetchVegetables: async () => {
     set({ loading: true, error: null });
     const { data, error } = await VegetableAPI.getAll();
-    set({ vegetables: data || [], loading: false });
+    if (data) {
+      set({ vegetables: data as Vegetables[] });
+    }
+    set({ loading: false });
+    if (error) {
+      throw new Error(error);
+    }
   },
   createVegetable: async (vegetable: Omit<Vegetables, 'id'>) => {
     set({ loading: true, error: null });
@@ -27,5 +33,8 @@ export const useVegetableStore = create<VegetableStore>((set) => ({
       set((state) => ({ vegetables: [...state.vegetables, data as Vegetables] }));
     }
     set({ loading: false });
+    if (error) {
+      throw new Error(error);
+    }
   },
 }));

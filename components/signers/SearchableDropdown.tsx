@@ -1,6 +1,3 @@
-/**
- * Custom SearchableDropdown component for React Native
- */
 import { Feather } from '@expo/vector-icons';
 import React, { useState, useRef, useEffect } from 'react';
 import {
@@ -17,34 +14,40 @@ import {
   Platform,
 } from 'react-native';
 
+import { useSignerStore } from '~/app/store/signers';
+import type { Signer } from '~/types';
 interface SearchableDropdownProps {
-  data: { id: string; name: string }[];
   value: string;
   onSelect: (value: { id: string; name: string }) => void;
   placeholder?: string;
 }
 
 export function SearchableDropdown({
-  data,
   value,
   onSelect,
-  placeholder = 'Select a provider',
+  placeholder = 'Select a signer',
 }: SearchableDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
-  const [filteredData, setFilteredData] = useState(data);
+  const [filteredData, setFilteredData] = useState<Signer[]>([]);
   const animation = useRef(new Animated.Value(0)).current;
 
+  const { signers, fetchSigners, loading } = useSignerStore();
+
   useEffect(() => {
+    if (signers.length === 0) {
+      fetchSigners();
+    }
+
     if (search) {
-      const filtered = data.filter((item) =>
+      const filtered = signers.filter((item) =>
         item.name.toLowerCase().includes(search.toLowerCase())
       );
       setFilteredData(filtered);
     } else {
-      setFilteredData(data);
+      setFilteredData(signers);
     }
-  }, [search, data]);
+  }, [search, signers]);
 
   const openModal = () => {
     setIsOpen(true);
@@ -98,7 +101,7 @@ export function SearchableDropdown({
               },
             ]}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Select Provider</Text>
+              <Text style={styles.modalTitle}>Select Signer</Text>
               <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
                 <Feather name="x" size={24} color="#2D3748" />
               </TouchableOpacity>
@@ -110,7 +113,7 @@ export function SearchableDropdown({
                 style={styles.searchInput}
                 value={search}
                 onChangeText={setSearch}
-                placeholder="Search providers..."
+                placeholder="Search signers..."
                 placeholderTextColor="#A0AEC0"
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -135,7 +138,7 @@ export function SearchableDropdown({
               showsVerticalScrollIndicator={false}
               ListEmptyComponent={
                 <View style={styles.emptyContainer}>
-                  <Text style={styles.emptyText}>No providers found</Text>
+                  <Text style={styles.emptyText}>No signers found</Text>
                 </View>
               }
             />
@@ -258,10 +261,6 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: '#A0AEC0',
-  },
-  optionId: {
-    fontSize: 12,
     color: '#A0AEC0',
   },
 });

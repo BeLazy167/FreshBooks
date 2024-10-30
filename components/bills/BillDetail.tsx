@@ -274,6 +274,7 @@ Thank you for your business!`;
           </View>
         </View>
       </View>
+      <Text style={styles.receiptId}>Receipt ID: {bill.id}</Text>
     </View>
   );
 }
@@ -460,5 +461,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#4299E1',
+  },
+  receiptId: {
+    alignSelf: 'center',
+    fontSize: 9,
+    color: '#718096',
   },
 });

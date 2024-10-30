@@ -1,9 +1,9 @@
 // app/_layout.tsx
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import * as Updates from 'expo-updates';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
-import * as Updates from 'expo-updates';
 
 // Prevent auto-hiding splash screen
 SplashScreen.preventAutoHideAsync();

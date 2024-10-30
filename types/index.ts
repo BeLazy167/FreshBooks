@@ -107,6 +107,18 @@ export interface VegetableRecord {
 }
 
 /**
+ * Signer related types
+ */
+export interface Signer {
+  id: string;
+  name: string;
+}
+
+export interface CreateSignerDTO {
+  name: string;
+}
+
+/**
  * API endpoints type for type-safe API calls
  */
 export const API_ENDPOINTS = {

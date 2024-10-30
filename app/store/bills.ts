@@ -56,7 +56,7 @@ export const useBillStore = create<BillStore>((set, get) => ({
       return data || undefined;
     } catch (error) {
       set({ error: 'Failed to fetch bill' });
-      return undefined;
+      throw error;
     }
   },
 

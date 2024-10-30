@@ -10,12 +10,13 @@ import {
   Platform,
 } from 'react-native';
 
-import { SearchableDropdown } from '../providers/SearchableDropdown';
+import { SearchableDropdown as SearchableProviderDropdown } from '../providers/SearchableDropdown';
+import { SearchableDropdown as SearchableSignerDropdown } from '../signers/SearchableDropdown';
+import { ItemInput as ItemInput2 } from '../vegetable/ItemInput';
 
 import { useProviderStore } from '~/app/store/providers';
 import type { CreateBillDTO, VegetableItem } from '~/types';
 import { formatCurrency } from '~/utils';
-
 interface BillFormProps {
   onSubmit: (bill: CreateBillDTO) => void;
 }
@@ -223,7 +224,7 @@ export function BillForm({ onSubmit }: BillFormProps) {
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Provider Name</Text>
-        <SearchableDropdown
+        <SearchableProviderDropdown
           data={providers}
           value={providerData.name}
           onSelect={(selectedData) => setProviderData(selectedData)}
@@ -233,19 +234,17 @@ export function BillForm({ onSubmit }: BillFormProps) {
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Add Item</Text>
-        <ItemInput currentItem={currentItem} onItemChange={setCurrentItem} onAddItem={addItem} />
+        <ItemInput2 currentItem={currentItem} onItemChange={setCurrentItem} onAddItem={addItem} />
       </View>
 
       {items.length > 0 && <ItemsList items={items} onRemoveItem={removeItem} total={total} />}
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Signer</Text>
-        <TextInput
-          style={styles.input}
+        <SearchableSignerDropdown
           value={signer}
-          onChangeText={setSigner}
-          placeholder="Signer"
-          placeholderTextColor="#A0AEC0"
+          onSelect={(selectedData) => setSigner(selectedData.name)}
+          placeholder="Select a signer"
         />
       </View>
 

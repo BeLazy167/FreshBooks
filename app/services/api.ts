@@ -1,9 +1,7 @@
-import { Bill, CreateProviderDTO, Provider, Vegetables } from '~/types';
+import { Bill, CreateProviderDTO, CreateSignerDTO, Provider, Signer, Vegetables } from '~/types';
 
 // services/api.ts
-const API_URL = 'https://freshbooksbackend.onrender.com/api';
-// const API_URL = 'http://localhost:3000/api';
-
+const API_URL = process.env.API_URL || 'https://freshbooksbackend.onrender.com/api';
 // Helper function for API calls
 async function fetchAPI<T>(
   endpoint: string,
@@ -91,6 +89,19 @@ export const VegetableAPI = {
     return fetchAPI<Vegetables>('/vegetables', {
       method: 'POST',
       body: JSON.stringify(vegetable),
+    });
+  },
+};
+
+export const SignerAPI = {
+  async getAll() {
+    return fetchAPI<Signer[]>('/signers');
+  },
+
+  async create(signer: CreateSignerDTO) {
+    return fetchAPI<Signer>('/signers', {
+      method: 'POST',
+      body: JSON.stringify(signer),
     });
   },
 };
