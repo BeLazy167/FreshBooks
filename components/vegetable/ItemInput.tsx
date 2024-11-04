@@ -32,14 +32,7 @@ export const ItemInput = ({ currentItem, onItemChange, onAddItem }: ItemInputPro
   const isDisabled = !currentItem.name || !currentItem.quantity || !currentItem.price;
   const inputRef = useRef<TextInput>(null);
   const [inputPosition, setInputPosition] = useState(0);
-
-  useEffect(() => {
-    if (showSuggestions && inputRef.current) {
-      inputRef.current.measureInWindow((x, y, width, height) => {
-        setInputPosition(y + height);
-      });
-    }
-  }, [showSuggestions]);
+  const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
 
   const availableSuggestions = suggestions.filter(
     (suggestion: Vegetables) => suggestion.isAvailable
@@ -56,8 +49,30 @@ export const ItemInput = ({ currentItem, onItemChange, onAddItem }: ItemInputPro
 
   const handleNameChange = (text: string) => {
     onItemChange({ ...currentItem, name: text });
-    loadSuggestions(text);
-    setShowSuggestions(true);
+
+    // Clear any existing timeout
+    if (typingTimeout) {
+      clearTimeout(typingTimeout);
+    }
+
+    // Only show suggestions if user has typed something
+    if (text.trim().length > 0) {
+      // Set new timeout
+      const newTimeout = setTimeout(() => {
+        loadSuggestions(text);
+        if (inputRef.current) {
+          inputRef.current.measureInWindow((x, y, width, height) => {
+            setInputPosition(y + height);
+          });
+        }
+        setShowSuggestions(true);
+      }, 300); // Wait for 300ms after user stops typing
+
+      setTypingTimeout(newTimeout);
+    } else {
+      setShowSuggestions(false);
+      clearSuggestions();
+    }
   };
 
   const handleSelectSuggestion = (name: string) => {
@@ -67,7 +82,6 @@ export const ItemInput = ({ currentItem, onItemChange, onAddItem }: ItemInputPro
     });
     setShowSuggestions(false);
     clearSuggestions();
-    inputRef.current?.blur();
   };
 
   const handleAddItem = () => {
@@ -76,67 +90,32 @@ export const ItemInput = ({ currentItem, onItemChange, onAddItem }: ItemInputPro
     clearSuggestions();
   };
 
+  const handleInputFocus = () => {
+    if (currentItem.name.trim().length > 0) {
+      loadSuggestions(currentItem.name);
+      if (inputRef.current) {
+        inputRef.current.measureInWindow((x, y, width, height) => {
+          setInputPosition(y + height);
+        });
+      }
+      setShowSuggestions(true);
+    }
+  };
+
   useEffect(() => {
     if (currentItem.price === 0) {
       setPriceInput('');
     }
   }, [currentItem.price]);
 
-  const renderSuggestions = () => {
-    if (Platform.OS === 'android') {
-      return (
-        <Modal
-          visible={showSuggestions && availableSuggestions.length > 0}
-          transparent
-          animationType="fade"
-          onRequestClose={() => setShowSuggestions(false)}>
-          <Pressable style={styles.modalOverlay} onPress={() => setShowSuggestions(false)}>
-            <View
-              style={[
-                styles.modalContent,
-                {
-                  position: 'absolute',
-                  top: inputPosition,
-                  left: 0,
-                  right: 0,
-                  maxHeight: 200,
-                },
-              ]}>
-              <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-                {availableSuggestions.map((suggestion: Vegetables) => (
-                  <TouchableOpacity
-                    key={suggestion.id}
-                    style={styles.suggestionItem}
-                    onPress={() => handleSelectSuggestion(suggestion.name)}>
-                    <Text style={styles.suggestionText}>{suggestion.name}</Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
-          </Pressable>
-        </Modal>
-      );
-    }
-
-    return showSuggestions && availableSuggestions.length > 0 ? (
-      <View style={styles.suggestionsWrapper}>
-        <ScrollView
-          style={styles.suggestionsContainer}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-          nestedScrollEnabled>
-          {availableSuggestions.map((suggestion: Vegetables) => (
-            <TouchableOpacity
-              key={suggestion.id}
-              style={styles.suggestionItem}
-              onPress={() => handleSelectSuggestion(suggestion.name)}>
-              <Text style={styles.suggestionText}>{suggestion.name}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
-    ) : null;
-  };
+  // Clean up timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (typingTimeout) {
+        clearTimeout(typingTimeout);
+      }
+    };
+  }, [typingTimeout]);
 
   return (
     <View style={styles.container}>
@@ -147,16 +126,62 @@ export const ItemInput = ({ currentItem, onItemChange, onAddItem }: ItemInputPro
           style={[styles.input, styles.itemNameInput]}
           value={currentItem.name}
           onChangeText={handleNameChange}
-          onBlur={() => {
-            if (Platform.OS !== 'android') {
-              setTimeout(() => setShowSuggestions(false), 200);
-            }
-          }}
-          onFocus={() => currentItem.name && loadSuggestions(currentItem.name)}
+          onFocus={handleInputFocus}
           placeholder="Item name"
           placeholderTextColor="#A0AEC0"
         />
-        {renderSuggestions()}
+        {Platform.OS === 'android' && (
+          <Modal
+            visible={showSuggestions && availableSuggestions.length > 0}
+            transparent
+            animationType="none"
+            onRequestClose={() => setShowSuggestions(false)}>
+            <Pressable style={styles.modalOverlay} onPress={() => setShowSuggestions(false)}>
+              <View
+                style={[
+                  styles.modalContent,
+                  {
+                    position: 'absolute',
+                    top: inputPosition,
+                    left: 16,
+                    right: 16,
+                    maxHeight: 200,
+                  },
+                ]}>
+                <ScrollView
+                  keyboardShouldPersistTaps="handled"
+                  showsVerticalScrollIndicator={false}>
+                  {availableSuggestions.map((suggestion: Vegetables) => (
+                    <TouchableOpacity
+                      key={suggestion.id}
+                      style={styles.suggestionItem}
+                      onPress={() => handleSelectSuggestion(suggestion.name)}>
+                      <Text style={styles.suggestionText}>{suggestion.name}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            </Pressable>
+          </Modal>
+        )}
+        {Platform.OS !== 'android' && showSuggestions && availableSuggestions.length > 0 && (
+          <View style={styles.suggestionsWrapper}>
+            <ScrollView
+              style={styles.suggestionsContainer}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+              nestedScrollEnabled>
+              {availableSuggestions.map((suggestion: Vegetables) => (
+                <TouchableOpacity
+                  key={suggestion.id}
+                  style={styles.suggestionItem}
+                  onPress={() => handleSelectSuggestion(suggestion.name)}>
+                  <Text style={styles.suggestionText}>{suggestion.name}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        )}
       </View>
 
       <View style={styles.itemInputsRow}>
@@ -218,20 +243,18 @@ const styles = StyleSheet.create({
       android: {
         elevation: 2,
       },
-      web: {
-        outlineStyle: 'none',
-      },
     }),
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
   },
   modalContent: {
     backgroundColor: 'white',
     borderRadius: 12,
-    marginHorizontal: 16,
     elevation: 5,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   inputLabel: {
     fontSize: 14,
@@ -247,11 +270,6 @@ const styles = StyleSheet.create({
     color: '#2D3748',
     borderWidth: 1,
     borderColor: '#E8E8E8',
-    ...Platform.select({
-      web: {
-        outlineStyle: 'none',
-      },
-    }),
   },
   itemNameInput: {
     marginBottom: 0,
@@ -317,8 +335,6 @@ const styles = StyleSheet.create({
     maxHeight: 200,
     backgroundColor: 'white',
     borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
   },
   suggestionItem: {
     paddingVertical: 12,
