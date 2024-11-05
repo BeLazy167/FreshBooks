@@ -1,15 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  Platform,
-} from 'react-native';
-
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import { Dropdown } from 'react-native-element-dropdown';
 import { useVegetableSuggestions } from '~/hooks/useVegetableSuggestions';
 import { Vegetables } from '~/types';
 
@@ -25,13 +17,9 @@ interface ItemInputProps {
 
 export const ItemInput = ({ currentItem, onItemChange, onAddItem }: ItemInputProps) => {
   const [priceInput, setPriceInput] = useState('');
-  const [showSuggestions, setShowSuggestions] = useState(false);
   const { suggestions, loadSuggestions, clearSuggestions } = useVegetableSuggestions();
   const isDisabled = !currentItem.name || !currentItem.quantity || !currentItem.price;
-
-  const availableSuggestions = suggestions.filter(
-    (suggestion: Vegetables) => suggestion.isAvailable
-  );
+  const [isFocus, setIsFocus] = useState(false);
 
   const handlePriceChange = (text: string) => {
     const cleanedText = text.replace(/[^0-9.]/g, '');
@@ -40,21 +28,6 @@ export const ItemInput = ({ currentItem, onItemChange, onAddItem }: ItemInputPro
 
     setPriceInput(formattedText);
     onItemChange({ ...currentItem, price: parseFloat(formattedText) || 0 });
-  };
-
-  const handleNameChange = (text: string) => {
-    onItemChange({ ...currentItem, name: text });
-    loadSuggestions(text);
-    setShowSuggestions(true);
-  };
-
-  const handleSelectSuggestion = (name: string) => {
-    onItemChange({
-      ...currentItem,
-      name,
-    });
-    setShowSuggestions(false);
-    clearSuggestions();
   };
 
   const handleAddItem = () => {
@@ -69,37 +42,41 @@ export const ItemInput = ({ currentItem, onItemChange, onAddItem }: ItemInputPro
     }
   }, [currentItem.price]);
 
+  const dropdownData = suggestions.map((item: Vegetables) => ({
+    label: item.name,
+    value: item.name,
+  }));
+
   return (
     <View style={styles.container}>
       <View style={styles.nameInputWrapper}>
         <Text style={styles.inputLabel}>Item Name</Text>
-        <TextInput
-          style={[styles.input, styles.itemNameInput]}
+        <Dropdown
+          style={[styles.dropdown, isFocus && { borderColor: '#4299E1' }]}
+          placeholderStyle={styles.placeholderStyle}
+          selectedTextStyle={styles.selectedTextStyle}
+          inputSearchStyle={styles.inputSearchStyle}
+          data={dropdownData}
+          search
+          maxHeight={300}
+          labelField="label"
+          valueField="value"
+          placeholder={`${currentItem.name || 'Item name'}`}
+          searchPlaceholder="Type to search..."
           value={currentItem.name}
-          onChangeText={handleNameChange}
-          onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-          onFocus={() => currentItem.name && loadSuggestions(currentItem.name)}
-          placeholder="Item name"
-          placeholderTextColor="#A0AEC0"
+          onFocus={() => setIsFocus(true)}
+          onBlur={() => setIsFocus(false)}
+          onChange={(item) => {
+            onItemChange({ ...currentItem, name: item.value });
+            setIsFocus(false);
+          }}
+          onChangeText={(text) => {
+            loadSuggestions(text);
+            if (text) {
+              onItemChange({ ...currentItem, name: text });
+            }
+          }}
         />
-        {showSuggestions && availableSuggestions.length > 0 && (
-          <View style={styles.suggestionsWrapper}>
-            <ScrollView
-              style={styles.suggestionsContainer}
-              keyboardShouldPersistTaps="handled"
-              showsVerticalScrollIndicator={false}
-              nestedScrollEnabled>
-              {availableSuggestions.map((suggestion: Vegetables) => (
-                <TouchableOpacity
-                  key={suggestion.id}
-                  style={styles.suggestionItem}
-                  onPress={() => handleSelectSuggestion(suggestion.name)}>
-                  <Text style={styles.suggestionText}>{suggestion.name}</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
-        )}
       </View>
 
       <View style={styles.itemInputsRow}>
@@ -140,12 +117,18 @@ export const ItemInput = ({ currentItem, onItemChange, onAddItem }: ItemInputPro
 
 const styles = StyleSheet.create({
   container: {
-    zIndex: 1, // Ensure the container stacks above other elements
+    zIndex: 1,
   },
   nameInputWrapper: {
-    position: 'relative',
-    zIndex: 2, // Ensure suggestions appear above other inputs
     marginBottom: 20,
+  },
+  dropdown: {
+    height: 50,
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
   },
   inputContainer: {
     backgroundColor: 'white',
@@ -160,9 +143,6 @@ const styles = StyleSheet.create({
       },
       android: {
         elevation: 2,
-      },
-      web: {
-        outlineStyle: 'none',
       },
     }),
   },
@@ -180,20 +160,11 @@ const styles = StyleSheet.create({
     color: '#2D3748',
     borderWidth: 1,
     borderColor: '#E8E8E8',
-    ...Platform.select({
-      web: {
-        outlineStyle: 'none',
-      },
-    }),
-  },
-  itemNameInput: {
-    marginBottom: 0,
   },
   itemInputsRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    zIndex: 1,
   },
   smallInputContainer: {
     flex: 1,
@@ -223,57 +194,17 @@ const styles = StyleSheet.create({
   addButtonDisabled: {
     backgroundColor: '#CBD5E0',
   },
-  suggestionsWrapper: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    position: 'absolute',
-    top: '100%',
-    left: 0,
-    right: 0,
-    zIndex: 1000,
-    marginTop: 2,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 12,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
+  placeholderStyle: {
+    fontSize: 16,
+    color: '#A0AEC0',
   },
-  suggestionsContainer: {
-    maxHeight: 200,
-    backgroundColor: 'white',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 12,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
-  },
-  suggestionItem: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#EDF2F7',
-  },
-  suggestionText: {
+  selectedTextStyle: {
     fontSize: 16,
     color: '#2D3748',
-    fontWeight: '500',
+  },
+  inputSearchStyle: {
+    height: 40,
+    fontSize: 16,
   },
 });
 
