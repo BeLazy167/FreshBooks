@@ -75,3 +75,7 @@ export const useBillStore = create<BillStore>((set, get) => ({
     }
   },
 }));
+
+export default function BillsStore() {
+  return null;
+}

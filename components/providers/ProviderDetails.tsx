@@ -110,10 +110,7 @@ export function ProviderDetails({ id, onClose, visible }: ProviderDetailsProps) 
               <Text style={styles.infoText}>{state.provider.address}</Text>
             </View>
           )}
-
-          <Text style={styles.dateText}>
-            Member since: {new Date(state.provider.created_at).toLocaleDateString()}
-          </Text>
+          <Text style={styles.idText}>Id: {state.provider.id}</Text>
         </View>
       );
     }
@@ -188,6 +185,7 @@ const styles = StyleSheet.create({
   },
   detailsContainer: {
     alignItems: 'center',
+    alignContent: 'center',
     padding: 20,
   },
   iconContainer: {
@@ -208,6 +206,7 @@ const styles = StyleSheet.create({
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    alignSelf: 'center',
     gap: 12,
     paddingVertical: 8,
     width: '100%',
@@ -217,10 +216,11 @@ const styles = StyleSheet.create({
     color: '#4A5568',
     flex: 1,
   },
-  dateText: {
-    fontSize: 14,
+  idText: {
+    fontSize: 12,
     color: '#718096',
     marginTop: 20,
+    alignSelf: 'flex-start',
   },
   loadingContainer: {
     flex: 1,

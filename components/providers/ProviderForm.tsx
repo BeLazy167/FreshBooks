@@ -38,15 +38,12 @@ export function ProviderForm({ visible, onClose }: ProviderFormProps) {
 
     setIsLoading(true);
     try {
-      console.log('Creating provider:', providerData);
       await createProvider(providerData as CreateProviderDTO);
 
       setProviderData({ name: '', mobile: '', address: '' });
       onClose();
     } catch (error) {
-      Alert.alert('Error', 'Failed to create provider. Please try again.', [
-        { text: 'OK', onPress: () => console.log('OK pressed') },
-      ]);
+      Alert.alert('Error', 'Failed to create provider. Please try again.', [{ text: 'OK' }]);
     } finally {
       setIsLoading(false);
     }

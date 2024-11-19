@@ -15,8 +15,6 @@ export default function CreateBillScreen() {
       created_at: new Date(),
     };
 
-    console.log('Created bill:', newBill);
-
     createBill(newBill);
 
     // Navigate back to bills list

@@ -68,3 +68,7 @@ export const useProviderStore = create<ProviderStore>((set, get) => ({
     }
   },
 }));
+
+export default function ProvidersStore() {
+  return null;
+}

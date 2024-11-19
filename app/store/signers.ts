@@ -35,3 +35,7 @@ export const useSignerStore = create<SignerStore>((set) => ({
     }
   },
 }));
+
+export default function SignersStore() {
+  return null;
+}

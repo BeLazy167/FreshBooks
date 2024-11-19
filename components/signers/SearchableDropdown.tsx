@@ -12,6 +12,8 @@ import {
   Animated,
   Keyboard,
   Platform,
+  StyleProp,
+  ViewStyle,
 } from 'react-native';
 
 import { useSignerStore } from '~/app/store/signers';
@@ -20,12 +22,14 @@ interface SearchableDropdownProps {
   value: string;
   onSelect: (value: { id: string; name: string }) => void;
   placeholder?: string;
+  containerStyle?: StyleProp<ViewStyle>;
 }
 
 export function SearchableDropdown({
   value,
   onSelect,
   placeholder = 'Select a signer',
+  containerStyle,
 }: SearchableDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -82,7 +86,7 @@ export function SearchableDropdown({
   return (
     <>
       <TouchableOpacity
-        style={[styles.dropdownButton, value ? styles.dropdownButtonActive : null]}
+        style={[styles.dropdownButton, value ? styles.dropdownButtonActive : null, containerStyle]}
         onPress={openModal}>
         <Text style={[styles.dropdownButtonText, !value ? styles.placeholderText : null]}>
           {value || placeholder}

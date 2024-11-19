@@ -67,7 +67,6 @@ export const ItemInput = ({ currentItem, onItemChange, onAddItem }: ItemInputPro
         keyboardDismissMode="on-drag"
         style={{ flex: 1 }}>
         <View style={styles.nameInputWrapper}>
-          <Text style={styles.inputLabel}>Item Name</Text>
           <Dropdown
             style={[styles.dropdown, isFocus && { borderColor: '#4299E1' }]}
             placeholderStyle={styles.placeholderStyle}
@@ -151,7 +150,7 @@ const styles = StyleSheet.create({
     borderColor: '#E8E8E8',
   },
   inputContainer: {
-    backgroundColor: 'white',
+    backgroundColor: 'transparent',
     borderRadius: 16,
     borderColor: '#E8E8E8',
     ...Platform.select({
@@ -202,9 +201,9 @@ const styles = StyleSheet.create({
     ...Platform.select({
       ios: {
         shadowColor: '#4299E1',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 2,
       },
       android: {
         elevation: 4,

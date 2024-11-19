@@ -38,3 +38,7 @@ export const useVegetableStore = create<VegetableStore>((set) => ({
     }
   },
 }));
+
+export default function VegetablesStore() {
+  return null;
+}

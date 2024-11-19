@@ -27,14 +27,16 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.belazy.FreshBooks"
+      "bundleIdentifier": "com.belazy.FreshBooks",
+      "newArchEnabled": true
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#299737"
       },
-      "package": "com.belazy.FreshBooks"
+      "package": "com.belazy.FreshBooks",
+      "newArchEnabled": true
     },
     "extra": {
       "eas": {
