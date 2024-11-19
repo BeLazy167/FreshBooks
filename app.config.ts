@@ -14,19 +14,44 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     image: './assets/splash.png',
     resizeMode: 'contain',
     backgroundColor: '#299737',
+    imageResizeMode: 'contain'
   },
   ios: {
     supportsTablet: true,
     bundleIdentifier: 'com.belazy.FreshBooks',
     newArchEnabled: true,
+    icon: './assets/icon.png',
+    splash: {
+      image: './assets/splash.png',
+      resizeMode: 'contain',
+      backgroundColor: '#299737',
+      dark: {
+        image: './assets/splash.png',
+        resizeMode: 'contain',
+        backgroundColor: '#299737'
+      }
+    }
   },
   android: {
     adaptiveIcon: {
       foregroundImage: './assets/adaptive-icon.png',
-      backgroundColor: '#299737',
+      backgroundColor: '#299737'
     },
     package: 'com.belazy.FreshBooks',
     newArchEnabled: true,
+    splash: {
+      image: './assets/splash.png',
+      resizeMode: 'contain',
+      backgroundColor: '#299737',
+      dark: {
+        image: './assets/splash.png',
+        resizeMode: 'contain',
+        backgroundColor: '#299737'
+      }
+    }
+  },
+  web: {
+    favicon: './assets/favicon.png'
   },
   experiments: {
     typedRoutes: true,
