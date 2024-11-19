@@ -124,7 +124,8 @@ export function VegetableAutocomplete({ value, onChange, onSubmit }: VegetableAu
                   </TouchableOpacity>
                 )}
                 style={styles.suggestionsList}
-                keyboardShouldPersistTaps="handled"
+                keyboardShouldPersistTaps="always"
+                keyboardDismissMode="on-drag"
                 ListEmptyComponent={
                   searchQuery.length >= 2 ? (
                     <View style={styles.emptyContainer}>

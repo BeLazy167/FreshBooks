@@ -141,6 +141,8 @@ export function SearchableDropdown({
                   <Text style={styles.emptyText}>No signers found</Text>
                 </View>
               }
+              keyboardShouldPersistTaps="always"
+              keyboardDismissMode="on-drag"
             />
           </Animated.View>
         </View>

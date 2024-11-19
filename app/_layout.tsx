@@ -57,7 +57,6 @@ export default function RootLayout() {
           fontSize: 18,
         },
         headerTitleAlign: 'left',
-        headerBackTitleVisible: false, // Hide back button text on iOS
         animation: 'slide_from_right', // Consistent animation
         contentStyle: {
           backgroundColor: '#fff', // Consistent background

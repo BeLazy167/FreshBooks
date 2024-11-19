@@ -138,6 +138,8 @@ export function SearchableDropdown({
                   <Text style={styles.emptyText}>No providers found</Text>
                 </View>
               }
+              keyboardShouldPersistTaps="always"
+              keyboardDismissMode="on-drag"
             />
           </Animated.View>
         </View>

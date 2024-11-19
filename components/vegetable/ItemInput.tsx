@@ -1,6 +1,16 @@
 import { Feather } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Platform,
+  KeyboardAvoidingView,
+  ScrollView,
+  Keyboard,
+} from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import { useVegetableSuggestions } from '~/hooks/useVegetableSuggestions';
 import { Vegetables } from '~/types';
@@ -31,6 +41,7 @@ export const ItemInput = ({ currentItem, onItemChange, onAddItem }: ItemInputPro
   };
 
   const handleAddItem = () => {
+    Keyboard.dismiss();
     onAddItem();
     setPriceInput('');
     clearSuggestions();
@@ -48,76 +59,85 @@ export const ItemInput = ({ currentItem, onItemChange, onAddItem }: ItemInputPro
   }));
 
   return (
-    <View style={styles.container}>
-      <View style={styles.nameInputWrapper}>
-        <Text style={styles.inputLabel}>Item Name</Text>
-        <Dropdown
-          style={[styles.dropdown, isFocus && { borderColor: '#4299E1' }]}
-          placeholderStyle={styles.placeholderStyle}
-          selectedTextStyle={styles.selectedTextStyle}
-          inputSearchStyle={styles.inputSearchStyle}
-          data={dropdownData}
-          search
-          maxHeight={300}
-          labelField="label"
-          valueField="value"
-          placeholder={`${currentItem.name || 'Item name'}`}
-          searchPlaceholder="Type to search..."
-          value={currentItem.name}
-          onFocus={() => setIsFocus(true)}
-          onBlur={() => setIsFocus(false)}
-          onChange={(item) => {
-            onItemChange({ ...currentItem, name: item.value });
-            setIsFocus(false);
-          }}
-          onChangeText={(text) => {
-            loadSuggestions(text);
-            if (text) {
-              onItemChange({ ...currentItem, name: text });
-            }
-          }}
-        />
-      </View>
-
-      <View style={styles.itemInputsRow}>
-        <View style={[styles.inputContainer, styles.smallInputContainer]}>
-          <Text style={styles.inputLabel}>Qty</Text>
-          <TextInput
-            style={[styles.input, styles.smallInput]}
-            value={currentItem.quantity.toString()}
-            onChangeText={(text) => onItemChange({ ...currentItem, quantity: Number(text) || 0 })}
-            placeholder="Qty"
-            keyboardType="numeric"
-            placeholderTextColor="#A0AEC0"
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}>
+      <ScrollView
+        keyboardShouldPersistTaps="always"
+        keyboardDismissMode="on-drag"
+        style={{ flex: 1 }}>
+        <View style={styles.nameInputWrapper}>
+          <Text style={styles.inputLabel}>Item Name</Text>
+          <Dropdown
+            style={[styles.dropdown, isFocus && { borderColor: '#4299E1' }]}
+            placeholderStyle={styles.placeholderStyle}
+            selectedTextStyle={styles.selectedTextStyle}
+            inputSearchStyle={styles.inputSearchStyle}
+            data={dropdownData}
+            search
+            maxHeight={300}
+            labelField="label"
+            valueField="value"
+            placeholder={`${currentItem.name || 'Item name'}`}
+            searchPlaceholder="Type to search..."
+            value={currentItem.name}
+            onFocus={() => setIsFocus(true)}
+            onBlur={() => setIsFocus(false)}
+            onChange={(item) => {
+              onItemChange({ ...currentItem, name: item.value });
+              setIsFocus(false);
+            }}
+            onChangeText={(text) => {
+              loadSuggestions(text);
+              if (text) {
+                onItemChange({ ...currentItem, name: text });
+              }
+            }}
           />
         </View>
 
-        <View style={[styles.inputContainer, styles.smallInputContainer]}>
-          <Text style={styles.inputLabel}>Price</Text>
-          <TextInput
-            style={[styles.input, styles.smallInput]}
-            value={priceInput}
-            onChangeText={handlePriceChange}
-            placeholder="Price"
-            keyboardType="decimal-pad"
-            placeholderTextColor="#A0AEC0"
-          />
-        </View>
+        <View style={styles.itemInputsRow}>
+          <View style={[styles.inputContainer, styles.smallInputContainer]}>
+            <Text style={styles.inputLabel}>Qty</Text>
+            <TextInput
+              style={[styles.input, styles.smallInput]}
+              value={currentItem.quantity.toString()}
+              onChangeText={(text) => onItemChange({ ...currentItem, quantity: Number(text) || 0 })}
+              placeholder="Qty"
+              keyboardType="numeric"
+              placeholderTextColor="#A0AEC0"
+            />
+          </View>
 
-        <TouchableOpacity
-          style={[styles.addButton, isDisabled && styles.addButtonDisabled]}
-          onPress={handleAddItem}
-          disabled={isDisabled}>
-          <Feather name="plus" size={24} color="white" />
-        </TouchableOpacity>
-      </View>
-    </View>
+          <View style={[styles.inputContainer, styles.smallInputContainer]}>
+            <Text style={styles.inputLabel}>Price</Text>
+            <TextInput
+              style={[styles.input, styles.smallInput]}
+              value={priceInput}
+              onChangeText={handlePriceChange}
+              placeholder="Price"
+              keyboardType="decimal-pad"
+              placeholderTextColor="#A0AEC0"
+            />
+          </View>
+
+          <TouchableOpacity
+            style={[styles.addButton, isDisabled && styles.addButtonDisabled]}
+            onPress={handleAddItem}
+            disabled={isDisabled}
+            activeOpacity={0.7}>
+            <Feather name="plus" size={24} color="white" />
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     zIndex: 1,
+    flex: 1,
   },
   nameInputWrapper: {
     marginBottom: 20,

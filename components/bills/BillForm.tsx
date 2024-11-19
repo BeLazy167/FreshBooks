@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
+  KeyboardAvoidingView,
   Platform,
 } from 'react-native';
 
@@ -219,42 +220,50 @@ export function BillForm({ onSubmit }: BillFormProps) {
   const isSubmitDisabled = !providerData.id || items.length === 0;
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <Text style={styles.title}>Create Bill</Text>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1 }}>
+      <ScrollView
+        style={styles.container}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="always"
+        keyboardDismissMode="on-drag">
+        <Text style={styles.title}>Create Bill</Text>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Provider Name</Text>
-        <SearchableProviderDropdown
-          data={providers}
-          value={providerData.name}
-          onSelect={(selectedData) => setProviderData(selectedData)}
-          placeholder="Select a provider"
-        />
-      </View>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Provider Name</Text>
+          <SearchableProviderDropdown
+            data={providers}
+            value={providerData.name}
+            onSelect={(selectedData) => setProviderData(selectedData)}
+            placeholder="Select a provider"
+          />
+        </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Add Item</Text>
-        <ItemInput2 currentItem={currentItem} onItemChange={setCurrentItem} onAddItem={addItem} />
-      </View>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Add Item</Text>
+          <ItemInput2 currentItem={currentItem} onItemChange={setCurrentItem} onAddItem={addItem} />
+        </View>
 
-      {items.length > 0 && <ItemsList items={items} onRemoveItem={removeItem} total={total} />}
+        {items.length > 0 && <ItemsList items={items} onRemoveItem={removeItem} total={total} />}
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Signer</Text>
-        <SearchableSignerDropdown
-          value={signer}
-          onSelect={(selectedData) => setSigner(selectedData.name)}
-          placeholder="Select a signer"
-        />
-      </View>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Signer</Text>
+          <SearchableSignerDropdown
+            value={signer}
+            onSelect={(selectedData) => setSigner(selectedData.name)}
+            placeholder="Select a signer"
+          />
+        </View>
 
-      <TouchableOpacity
-        style={[styles.submitButton, isSubmitDisabled && styles.submitButtonDisabled]}
-        onPress={handleSubmit}
-        disabled={isSubmitDisabled}>
-        <Text style={styles.submitButtonText}>Create Bill</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        <TouchableOpacity
+          style={[styles.submitButton, isSubmitDisabled && styles.submitButtonDisabled]}
+          onPress={handleSubmit}
+          disabled={isSubmitDisabled}>
+          <Text style={styles.submitButtonText}>Create Bill</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
