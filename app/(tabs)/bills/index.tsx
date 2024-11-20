@@ -2,26 +2,27 @@
 import { Stack, router } from 'expo-router';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { ScrollView, StyleSheet, View, ActivityIndicator, RefreshControl } from 'react-native';
+import { startOfDay, endOfDay, isWithinInterval } from 'date-fns';
 
 import { useBillStore } from '~/app/store/bills';
 import { Container } from '~/components/Container';
-import { BillFilter } from '~/components/bills/BillFilter';
 import { BillFromId } from '~/components/bills/BillFromId';
 import { BillHeader } from '~/components/bills/BillHeader';
 import { BillList } from '~/components/bills/BillList';
 import { BillSearch } from '~/components/bills/BillSearch';
 import { EmptyState } from '~/components/bills/EmptyState';
+import { BillFilters } from '~/components/bills/BillFilters';
 import type { Bill } from '~/types';
+import { useFiltersStore } from '~/app/store/filters';
 
 export default function BillsScreen() {
   // State management
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState<'date' | 'amount'>('date');
   const [selectedBillId, setSelectedBillId] = useState<string | null>(null);
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [refreshing, setRefreshing] = useState(false);
 
   const { bills, loading, error, fetchBills } = useBillStore();
+  const { providerId, signerId, startDate, endDate } = useFiltersStore();
 
   // Initial data fetch
   useEffect(() => {
@@ -42,16 +43,51 @@ export default function BillsScreen() {
 
   // Memoized filtered and sorted bills
   const filteredBills = useMemo(() => {
-    return bills
-      .filter((bill) => bill.providerName.toLowerCase().includes(searchQuery.toLowerCase().trim()))
-      .sort((a, b) => {
-        const multiplier = sortDirection === 'desc' ? 1 : -1;
-        if (sortBy === 'date') {
-          return multiplier * (new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    return bills.filter((bill) => {
+      // Provider filter
+      if (providerId && bill.providerId !== providerId) {
+        return false;
+      }
+
+      // Signer filter
+      if (signerId && bill.signer !== signerId) {
+        return false;
+      }
+
+      // Date range filter
+      if (startDate || endDate) {
+        const billDate = new Date(bill.date);
+        const startDateObj = startDate ? new Date(startDate) : null;
+        const endDateObj = endDate ? new Date(endDate) : null;
+
+        if (startDateObj && endDateObj) {
+          return isWithinInterval(billDate, {
+            start: startOfDay(startDateObj),
+            end: endOfDay(endDateObj),
+          });
         }
-        return multiplier * (Number(b.total) - Number(a.total));
-      });
-  }, [bills, searchQuery, sortBy, sortDirection]);
+
+        if (startDateObj && billDate < startOfDay(startDateObj)) {
+          return false;
+        }
+
+        if (endDateObj && billDate > endOfDay(endDateObj)) {
+          return false;
+        }
+      }
+
+      // Search query filter
+      if (searchQuery) {
+        const searchLower = searchQuery.toLowerCase();
+        return (
+          bill.providerName.toLowerCase().includes(searchLower) ||
+          bill.items.some((item) => item.name.toLowerCase().includes(searchLower))
+        );
+      }
+
+      return true;
+    });
+  }, [bills, providerId, signerId, startDate, endDate, searchQuery]);
 
   // Event handlers
   const handleBillPress = useCallback((bill: Bill) => {
@@ -65,14 +101,6 @@ export default function BillsScreen() {
   const handleCloseModal = useCallback(() => {
     setSelectedBillId(null);
   }, []);
-
-  const handleSortChange = useCallback(
-    (newSort: { option: 'date' | 'amount'; direction: 'asc' | 'desc' }) => {
-      setSortBy(newSort.option);
-      setSortDirection(newSort.direction);
-    },
-    []
-  );
 
   // Loading state
   if (loading && !refreshing) {
@@ -109,6 +137,8 @@ export default function BillsScreen() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={styles.container}
+        keyboardShouldPersistTaps="always"
+        keyboardDismissMode="on-drag"
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#007AFF']} />
         }>
@@ -120,10 +150,7 @@ export default function BillsScreen() {
             onChangeText={setSearchQuery}
             onClear={() => setSearchQuery('')}
           />
-          <BillFilter
-            sortState={{ option: sortBy, direction: sortDirection }}
-            onSortChange={handleSortChange}
-          />
+          <BillFilters />
         </View>
 
         {filteredBills.length > 0 ? (

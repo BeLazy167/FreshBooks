@@ -105,3 +105,7 @@ export const SignerAPI = {
     });
   },
 };
+
+export default function Api() {
+  return null;
+}

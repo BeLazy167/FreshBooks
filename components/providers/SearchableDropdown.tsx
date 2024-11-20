@@ -15,13 +15,18 @@ import {
   Animated,
   Keyboard,
   Platform,
+  StyleProp,
+  ViewStyle,
 } from 'react-native';
 
+import type { Provider } from '~/types';
+
 interface SearchableDropdownProps {
-  data: { id: string; name: string }[];
+  data: Provider[];
   value: string;
-  onSelect: (value: { id: string; name: string }) => void;
-  placeholder?: string;
+  onSelect: (selectedData: { id: string; name: string }) => void;
+  placeholder: string;
+  containerStyle?: StyleProp<ViewStyle>;
 }
 
 export function SearchableDropdown({
@@ -29,6 +34,7 @@ export function SearchableDropdown({
   value,
   onSelect,
   placeholder = 'Select a provider',
+  containerStyle,
 }: SearchableDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');

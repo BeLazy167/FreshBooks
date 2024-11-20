@@ -71,11 +71,6 @@ export const BillFilter = memo(
           direction: newDirection,
         };
 
-        console.log('Filter changed:', {
-          previous: sortState,
-          new: newState,
-        });
-
         onSortChange(newState);
       },
       [sortState, onSortChange]

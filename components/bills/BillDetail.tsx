@@ -158,7 +158,6 @@ Thank you for your business!`;
       });
 
       if (result.action === Share.sharedAction && result.activityType) {
-        console.log('Shared with activity type:', result.activityType);
       }
     } catch (error) {
       Alert.alert(

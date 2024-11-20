@@ -13,103 +13,15 @@ import {
 
 import { SearchableDropdown as SearchableProviderDropdown } from '../providers/SearchableDropdown';
 import { SearchableDropdown as SearchableSignerDropdown } from '../signers/SearchableDropdown';
-import { ItemInput as ItemInput2 } from '../vegetable/ItemInput';
+import { ItemInput } from '../vegetable/ItemInput';
 
 import { useProviderStore } from '~/app/store/providers';
 import type { CreateBillDTO, VegetableItem } from '~/types';
 import { formatCurrency } from '~/utils';
+import { ModernDropdown } from '../providers/MordernDropdown';
 interface BillFormProps {
   onSubmit: (bill: CreateBillDTO) => void;
 }
-
-interface ItemInputProps {
-  currentItem: {
-    name: string;
-    quantity: number;
-    price: number;
-  };
-  onItemChange: (item: { name: string; quantity: number; price: number }) => void;
-  onAddItem: () => void;
-}
-
-const ItemInput = ({ currentItem, onItemChange, onAddItem }: ItemInputProps) => {
-  const [priceInput, setPriceInput] = useState('');
-  const isDisabled = !currentItem.name || !currentItem.quantity || !currentItem.price;
-
-  const handlePriceChange = (text: string) => {
-    // Allow normal numeric input including decimals
-    const cleanedText = text.replace(/[^0-9.]/g, '');
-
-    // Ensure only one decimal point
-    const parts = cleanedText.split('.');
-    const formattedText = parts.length > 2 ? `${parts[0]}.${parts.slice(1).join('')}` : cleanedText;
-
-    setPriceInput(formattedText);
-    onItemChange({ ...currentItem, price: parseFloat(formattedText) || 0 });
-  };
-
-  const handleAddItem = () => {
-    onAddItem();
-    setPriceInput(''); // Reset price input field
-  };
-
-  // Reset price input when currentItem.price is reset to 0
-  useEffect(() => {
-    if (currentItem.price === 0) {
-      setPriceInput('');
-    }
-  }, [currentItem.price]);
-
-  return (
-    <>
-      <View style={styles.inputContainer}>
-        <Text style={styles.inputLabel}>Item Name</Text>
-        <TextInput
-          style={[styles.input, styles.itemNameInput]}
-          value={currentItem.name}
-          onChangeText={(text) => onItemChange({ ...currentItem, name: text })}
-          placeholder="Item name"
-          placeholderTextColor="#A0AEC0"
-        />
-      </View>
-
-      <View style={styles.itemInputsRow}>
-        <View style={[styles.inputContainer, styles.smallInputContainer]}>
-          <Text style={styles.inputLabel}>Qty</Text>
-
-          <TextInput
-            style={[styles.input, styles.smallInput]}
-            value={currentItem.quantity.toString()}
-            onChangeText={(text) => onItemChange({ ...currentItem, quantity: Number(text) || 0 })}
-            placeholder="Qty"
-            keyboardType="numeric"
-            placeholderTextColor="#A0AEC0"
-          />
-        </View>
-
-        <View style={[styles.inputContainer, styles.smallInputContainer]}>
-          <Text style={styles.inputLabel}>Price</Text>
-
-          <TextInput
-            style={[styles.input, styles.smallInput]}
-            value={priceInput}
-            onChangeText={handlePriceChange}
-            placeholder="Price"
-            keyboardType="decimal-pad"
-            placeholderTextColor="#A0AEC0"
-          />
-        </View>
-
-        <TouchableOpacity
-          style={[styles.addButton, isDisabled && styles.addButtonDisabled]}
-          onPress={handleAddItem}
-          disabled={isDisabled}>
-          <Feather name="plus" size={24} color="white" />
-        </TouchableOpacity>
-      </View>
-    </>
-  );
-};
 
 interface ItemsListProps {
   items: Omit<VegetableItem, 'id'>[];
@@ -232,17 +144,23 @@ export function BillForm({ onSubmit }: BillFormProps) {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Provider Name</Text>
-          <SearchableProviderDropdown
-            data={providers}
-            value={providerData.name}
-            onSelect={(selectedData) => setProviderData(selectedData)}
+
+          <ModernDropdown
+            data={providers.map((p) => ({ label: p.name, value: p.id }))}
+            value={providerData.id}
+            onSelect={(selected) =>
+              setProviderData({
+                id: selected.value.toString(),
+                name: selected.label,
+              })
+            }
             placeholder="Select a provider"
           />
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Add Item</Text>
-          <ItemInput2 currentItem={currentItem} onItemChange={setCurrentItem} onAddItem={addItem} />
+          <ItemInput currentItem={currentItem} onItemChange={setCurrentItem} onAddItem={addItem} />
         </View>
 
         {items.length > 0 && <ItemsList items={items} onRemoveItem={removeItem} total={total} />}
