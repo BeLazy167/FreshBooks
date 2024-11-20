@@ -16,11 +16,9 @@ import type { Bill } from '~/types';
 import { useFiltersStore } from '~/app/store/filters';
 
 export default function BillsScreen() {
-  // State management
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBillId, setSelectedBillId] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-
   const { bills, loading, error, fetchBills } = useBillStore();
   const { providerId, signerId, startDate, endDate } = useFiltersStore();
 

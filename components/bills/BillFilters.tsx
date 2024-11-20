@@ -1,6 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import { format } from 'date-fns';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 
@@ -10,6 +10,8 @@ import { SearchableDropdown as SignerDropdown } from '../signers/SearchableDropd
 import { useProviderStore } from '~/app/store/providers';
 import { useSignerStore } from '~/app/store/signers';
 import { useFiltersStore } from '~/app/store/filters';
+import { exportBillsToExcel } from '~/utils/excel';
+import { useBillStore } from '~/app/store/bills';
 
 export function BillFilters() {
   const [showStartDate, setShowStartDate] = useState(false);
@@ -41,8 +43,45 @@ export function BillFilters() {
   const startDateObj = startDate ? new Date(startDate) : null;
   const endDateObj = endDate ? new Date(endDate) : null;
 
+  const handleExportExcel = useCallback(async () => {
+    try {
+      const { bills } = useBillStore.getState();
+      await exportBillsToExcel(bills, {
+        providerId,
+        signerId,
+        startDate,
+        endDate,
+      });
+    } catch (error) {
+      console.error('Error exporting to Excel:', error);
+      // You might want to show an error toast here
+    }
+  }, [providerId, signerId, startDate, endDate]);
+
+  const { bills } = useBillStore();
+
+  const filteredCount = bills.filter(
+    (bill) =>
+      (!providerId || bill.providerId === providerId) &&
+      (!signerId || bill.signer === signerId) &&
+      (!startDate || new Date(bill.date) >= new Date(startDate)) &&
+      (!endDate || new Date(bill.date) <= new Date(endDate))
+  ).length;
+
   return (
     <View style={styles.container}>
+      <View style={styles.headerRow}>
+        <View style={styles.filterCount}>
+          {hasActiveFilters && (
+            <Text style={styles.filterCountText}>{filteredCount} bills found</Text>
+          )}
+        </View>
+        <TouchableOpacity style={styles.exportButton} onPress={handleExportExcel}>
+          <Feather name="download" size={20} color="#4299E1" />
+          <Text style={styles.exportButtonText}>Export Excel</Text>
+        </TouchableOpacity>
+      </View>
+
       <View style={styles.row}>
         <View style={styles.filterItem}>
           <ProviderDropdown
@@ -144,6 +183,32 @@ const styles = StyleSheet.create({
   clearButtonText: {
     color: '#FC8181',
     fontSize: 16,
+    fontWeight: '500',
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  filterCount: {
+    flex: 1,
+  },
+  filterCountText: {
+    fontSize: 14,
+    color: '#718096',
+  },
+  exportButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#EBF8FF',
+  },
+  exportButtonText: {
+    color: '#4299E1',
+    fontSize: 14,
     fontWeight: '500',
   },
 });
