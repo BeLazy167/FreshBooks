@@ -20,7 +20,7 @@ export function BillFilters() {
   const { providerId, signerId, startDate, endDate, setFilter, clearFilters } = useFiltersStore();
 
   const selectedProvider = providers.find((p) => p.id === providerId)?.name || '';
-  const selectedSigner = signers.find((s) => s.id === signerId)?.name || '';
+  const selectedSigner = signers.find((s) => s.name === signerId)?.name || '';
 
   const handleStartDateChange = (event: DateTimePickerEvent, date?: Date) => {
     setShowStartDate(false);
@@ -56,7 +56,7 @@ export function BillFilters() {
         <View style={styles.filterItem}>
           <SignerDropdown
             value={selectedSigner}
-            onSelect={(signer) => setFilter({ signerId: signer.id })}
+            onSelect={(signer) => setFilter({ signerId: signer.name })}
             placeholder="Filter by signer"
           />
         </View>

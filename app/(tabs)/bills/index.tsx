@@ -6,7 +6,6 @@ import { startOfDay, endOfDay, isWithinInterval } from 'date-fns';
 
 import { useBillStore } from '~/app/store/bills';
 import { Container } from '~/components/Container';
-import { BillFilter } from '~/components/bills/BillFilter';
 import { BillFromId } from '~/components/bills/BillFromId';
 import { BillHeader } from '~/components/bills/BillHeader';
 import { BillList } from '~/components/bills/BillList';
@@ -44,7 +43,7 @@ export default function BillsScreen() {
 
   // Memoized filtered and sorted bills
   const filteredBills = useMemo(() => {
-    return bills.filter(bill => {
+    return bills.filter((bill) => {
       // Provider filter
       if (providerId && bill.providerId !== providerId) {
         return false;
@@ -60,18 +59,18 @@ export default function BillsScreen() {
         const billDate = new Date(bill.date);
         const startDateObj = startDate ? new Date(startDate) : null;
         const endDateObj = endDate ? new Date(endDate) : null;
-        
+
         if (startDateObj && endDateObj) {
           return isWithinInterval(billDate, {
             start: startOfDay(startDateObj),
-            end: endOfDay(endDateObj)
+            end: endOfDay(endDateObj),
           });
         }
-        
+
         if (startDateObj && billDate < startOfDay(startDateObj)) {
           return false;
         }
-        
+
         if (endDateObj && billDate > endOfDay(endDateObj)) {
           return false;
         }
@@ -82,7 +81,7 @@ export default function BillsScreen() {
         const searchLower = searchQuery.toLowerCase();
         return (
           bill.providerName.toLowerCase().includes(searchLower) ||
-          bill.items.some(item => item.name.toLowerCase().includes(searchLower))
+          bill.items.some((item) => item.name.toLowerCase().includes(searchLower))
         );
       }
 
@@ -144,7 +143,7 @@ export default function BillsScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#007AFF']} />
         }>
         <BillHeader count={filteredBills.length} onAddPress={handleAddBill} />
-        
+
         <View style={styles.searchFilters}>
           <BillSearch
             value={searchQuery}
