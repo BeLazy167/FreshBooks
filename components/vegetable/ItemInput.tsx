@@ -8,7 +8,6 @@ import {
   StyleSheet,
   Platform,
   KeyboardAvoidingView,
-  FlatList,
   Pressable,
 } from 'react-native';
 import { useVegetableSuggestions } from '~/hooks/useVegetableSuggestions';
@@ -28,8 +27,11 @@ export const ItemInput = ({ currentItem, onItemChange, onAddItem }: ItemInputPro
   const [priceInput, setPriceInput] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [searchText, setSearchText] = useState('');
+  const [selectedVegetable, setSelectedVegetable] = useState<Vegetables | null>(null);
   const { suggestions, loadSuggestions, clearSuggestions } = useVegetableSuggestions();
-  const isDisabled = !currentItem.name || !currentItem.quantity || !currentItem.price;
+
+  const isDisabled =
+    !currentItem.name || !currentItem.quantity || !priceInput || parseFloat(priceInput) <= 0;
 
   const handlePriceChange = useCallback(
     (text: string) => {
@@ -39,23 +41,47 @@ export const ItemInput = ({ currentItem, onItemChange, onAddItem }: ItemInputPro
         parts.length > 2 ? `${parts[0]}.${parts.slice(1).join('')}` : cleanedText;
 
       setPriceInput(formattedText);
-      onItemChange({ ...currentItem, price: parseFloat(formattedText) || 0 });
+      const newPrice = parseFloat(formattedText) || 0;
+      onItemChange({ ...currentItem, price: newPrice });
     },
     [currentItem, onItemChange]
   );
 
   const handleAddItem = useCallback(() => {
+    const finalPrice = parseFloat(priceInput) || 0;
+    const formattedItem = {
+      ...currentItem,
+      price: Number(finalPrice.toFixed(2)),
+    };
+    onItemChange(formattedItem);
     onAddItem();
+
     setPriceInput('');
     setSearchText('');
+    setSelectedVegetable(null);
     clearSuggestions();
-  }, [onAddItem, clearSuggestions]);
+  }, [currentItem, priceInput, onAddItem, onItemChange, clearSuggestions]);
 
   const handleSelectSuggestion = useCallback(
-    (name: string) => {
-      onItemChange({ ...currentItem, name });
+    (vegetable: Vegetables) => {
+      setSelectedVegetable(vegetable);
       setShowSuggestions(false);
-      setSearchText(name);
+      setSearchText(vegetable.name);
+
+      if (vegetable.hasFixedPrice && vegetable.fixedPrice !== undefined) {
+        const suggestedPrice = vegetable.fixedPrice.toString();
+        setPriceInput(suggestedPrice);
+        onItemChange({
+          ...currentItem,
+          name: vegetable.name,
+          price: vegetable.fixedPrice,
+        });
+      } else {
+        onItemChange({
+          ...currentItem,
+          name: vegetable.name,
+        });
+      }
     },
     [currentItem, onItemChange]
   );
@@ -65,6 +91,7 @@ export const ItemInput = ({ currentItem, onItemChange, onAddItem }: ItemInputPro
       setSearchText(text);
       loadSuggestions(text);
       setShowSuggestions(true);
+      setSelectedVegetable(null);
       if (text) {
         onItemChange({ ...currentItem, name: text });
       }
@@ -75,17 +102,10 @@ export const ItemInput = ({ currentItem, onItemChange, onAddItem }: ItemInputPro
   useEffect(() => {
     if (currentItem.price === 0) {
       setPriceInput('');
+    } else if (currentItem.price > 0 && !priceInput) {
+      setPriceInput(currentItem.price.toString());
     }
   }, [currentItem.price]);
-
-  const renderSuggestion = useCallback(
-    ({ item }: { item: Vegetables }) => (
-      <Pressable style={styles.suggestionItem} onPress={() => handleSelectSuggestion(item.name)}>
-        <Text style={styles.suggestionText}>{item.name}</Text>
-      </Pressable>
-    ),
-    [handleSelectSuggestion]
-  );
 
   return (
     <KeyboardAvoidingView
@@ -95,7 +115,7 @@ export const ItemInput = ({ currentItem, onItemChange, onAddItem }: ItemInputPro
         <View style={styles.nameInputWrapper}>
           <Text style={styles.inputLabel}>Item Name</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, styles.nameInput]}
             value={searchText}
             onChangeText={handleSearchInput}
             placeholder="Search items..."
@@ -106,10 +126,15 @@ export const ItemInput = ({ currentItem, onItemChange, onAddItem }: ItemInputPro
               <View style={styles.suggestionsList}>
                 {suggestions.map((item) => (
                   <Pressable
-                    key={item.name}
+                    key={item.id}
                     style={styles.suggestionItem}
-                    onPress={() => handleSelectSuggestion(item.name)}>
-                    <Text style={styles.suggestionText}>{item.name}</Text>
+                    onPress={() => handleSelectSuggestion(item)}>
+                    <View style={styles.suggestionContent}>
+                      <Text style={styles.suggestionText}>{item.name}</Text>
+                      {item.hasFixedPrice && item.fixedPrice !== undefined && (
+                        <Text style={styles.suggestedPriceText}>Suggested: ${item.fixedPrice}</Text>
+                      )}
+                    </View>
                   </Pressable>
                 ))}
               </View>
@@ -122,8 +147,11 @@ export const ItemInput = ({ currentItem, onItemChange, onAddItem }: ItemInputPro
             <Text style={styles.inputLabel}>Qty</Text>
             <TextInput
               style={[styles.input, styles.smallInput]}
-              value={currentItem.quantity.toString()}
-              onChangeText={(text) => onItemChange({ ...currentItem, quantity: Number(text) || 0 })}
+              value={currentItem.quantity > 0 ? currentItem.quantity.toString() : ''}
+              onChangeText={(text) => {
+                const quantity = parseInt(text) || 0;
+                onItemChange({ ...currentItem, quantity });
+              }}
               placeholder="Qty"
               keyboardType="numeric"
               placeholderTextColor="#A0AEC0"
@@ -131,7 +159,9 @@ export const ItemInput = ({ currentItem, onItemChange, onAddItem }: ItemInputPro
           </View>
 
           <View style={[styles.inputContainer, styles.smallInputContainer]}>
-            <Text style={styles.inputLabel}>Price</Text>
+            <Text style={styles.inputLabel}>
+              Price {selectedVegetable?.hasFixedPrice && '(Suggested)'}
+            </Text>
             <TextInput
               style={[styles.input, styles.smallInput]}
               value={priceInput}
@@ -164,7 +194,41 @@ const styles = StyleSheet.create({
   },
   nameInputWrapper: {
     marginBottom: 20,
-    zIndex: 1000, // Ensure dropdown shows above other elements
+    zIndex: 1000,
+  },
+  inputContainer: {
+    backgroundColor: 'transparent',
+    borderRadius: 16,
+    borderColor: '#E8E8E8',
+  },
+  inputLabel: {
+    fontSize: 14,
+    color: '#4A5568',
+    marginBottom: 8,
+    fontWeight: '500',
+  },
+  input: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 16,
+    fontSize: 16,
+    color: '#2D3748',
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
+  },
+  nameInput: {
+    zIndex: 1000,
+  },
+  itemInputsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  smallInputContainer: {
+    flex: 1,
+  },
+  smallInput: {
+    textAlign: 'center',
   },
   suggestionsContainer: {
     position: 'absolute',
@@ -198,40 +262,19 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#E8E8E8',
   },
+  suggestionContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
   suggestionText: {
     fontSize: 16,
     color: '#2D3748',
   },
-  inputContainer: {
-    backgroundColor: 'transparent',
-    borderRadius: 16,
-    borderColor: '#E8E8E8',
-  },
-  inputLabel: {
+  suggestedPriceText: {
     fontSize: 14,
-    color: '#4A5568',
-    marginBottom: 8,
+    color: '#4299E1',
     fontWeight: '500',
-  },
-  input: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    color: '#2D3748',
-    borderWidth: 1,
-    borderColor: '#E8E8E8',
-  },
-  itemInputsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  smallInputContainer: {
-    flex: 1,
-  },
-  smallInput: {
-    textAlign: 'center',
   },
   addButton: {
     backgroundColor: '#4299E1',
