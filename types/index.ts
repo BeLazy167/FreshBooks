@@ -54,6 +54,8 @@ export interface Vegetables {
   id: string;
   name: string;
   isAvailable: boolean;
+  hasFixedPrice: boolean;
+  fixedPrice?: number;
 }
 
 /**

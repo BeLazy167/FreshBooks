@@ -11,7 +11,6 @@ import {
   Platform,
 } from 'react-native';
 
-import { SearchableDropdown as SearchableProviderDropdown } from '../providers/SearchableDropdown';
 import { SearchableDropdown as SearchableSignerDropdown } from '../signers/SearchableDropdown';
 import { ItemInput } from '../vegetable/ItemInput';
 
@@ -32,24 +31,28 @@ interface ItemsListProps {
 const ItemsList = ({ items, onRemoveItem, total }: ItemsListProps) => {
   return (
     <View style={styles.itemsCard}>
-      {items.map((item, index) => (
-        <View key={index} style={styles.itemRow}>
-          <View style={styles.flex}>
-            <Text style={styles.itemName}>{item.name}</Text>
-            <Text style={styles.itemDetails}>
-              {item.quantity} × {formatCurrency(item.price.toFixed(2))}
-            </Text>
+      {items.map((item, index) => {
+        const price = Number(item.price || 0);
+        const quantity = Number(item.quantity || 0);
+        const itemTotal = price * quantity;
+
+        return (
+          <View key={index} style={styles.itemRow}>
+            <View style={styles.flex}>
+              <Text style={styles.itemName}>{item.name}</Text>
+              <Text style={styles.itemDetails}>
+                {quantity} × {formatCurrency(price.toFixed(2))}
+              </Text>
+            </View>
+            <View style={styles.itemActions}>
+              <Text style={styles.itemTotal}>{formatCurrency(itemTotal.toFixed(2))}</Text>
+              <TouchableOpacity style={styles.removeButton} onPress={() => onRemoveItem(index)}>
+                <Feather name="x" size={16} color="white" />
+              </TouchableOpacity>
+            </View>
           </View>
-          <View style={styles.itemActions}>
-            <Text style={styles.itemTotal}>
-              {formatCurrency((item.quantity * item.price).toFixed(2))}
-            </Text>
-            <TouchableOpacity style={styles.removeButton} onPress={() => onRemoveItem(index)}>
-              <Feather name="x" size={16} color="white" />
-            </TouchableOpacity>
-          </View>
-        </View>
-      ))}
+        );
+      })}
 
       <View style={styles.totalRow}>
         <Text style={styles.totalLabel}>Total</Text>
@@ -78,20 +81,30 @@ export function BillForm({ onSubmit }: BillFormProps) {
 
   const addItem = useCallback(() => {
     if (currentItem.name && currentItem.quantity && currentItem.price) {
-      // Format the price to 2 decimal places only when adding to items array
-      const formattedPrice = parseFloat(currentItem.price.toFixed(2));
+      try {
+        // Ensure we have valid numbers
+        const price = Number(currentItem.price) || 0;
+        const quantity = Number(currentItem.quantity) || 0;
 
-      setItems((prevItems) => [
-        ...prevItems,
-        {
-          name: currentItem.name,
-          quantity: currentItem.quantity,
-          price: formattedPrice,
-          item_total: parseFloat((currentItem.quantity * formattedPrice).toFixed(2)),
-        },
-      ]);
-      setCurrentItem({ name: '', quantity: 0, price: 0 });
-      // Reset price input in ItemInput component by triggering a re-render
+        // Format the price to 2 decimal places
+        const formattedPrice = Number(price.toFixed(2));
+        const itemTotal = Number((quantity * formattedPrice).toFixed(2));
+
+        setItems((prevItems) => [
+          ...prevItems,
+          {
+            name: currentItem.name,
+            quantity: quantity,
+            price: formattedPrice,
+            item_total: itemTotal,
+          },
+        ]);
+
+        // Reset current item
+        setCurrentItem({ name: '', quantity: 0, price: 0 });
+      } catch (error) {
+        console.error('Error adding item:', error);
+      }
     }
   }, [currentItem]);
 
@@ -100,14 +113,19 @@ export function BillForm({ onSubmit }: BillFormProps) {
   }, []);
 
   const total = useMemo(() => {
-    return parseFloat(
-      items
-        .reduce(
-          (sum: number, item: Omit<VegetableItem, 'id'>) => sum + item.quantity * item.price,
-          0
-        )
-        .toFixed(2)
-    );
+    try {
+      return Number(
+        items
+          .reduce((sum, item) => {
+            const itemTotal = Number(item.quantity || 0) * Number(item.price || 0);
+            return sum + itemTotal;
+          }, 0)
+          .toFixed(2)
+      );
+    } catch (error) {
+      console.error('Error calculating total:', error);
+      return 0;
+    }
   }, [items]);
 
   const handleSubmit = useCallback(() => {

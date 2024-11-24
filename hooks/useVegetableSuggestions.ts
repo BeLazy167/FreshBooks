@@ -25,11 +25,16 @@ export function useVegetableSuggestions() {
       }
 
       const filtered = vegetables
-        .filter((veg: Vegetables) => veg.name.toLowerCase().includes(query.toLowerCase()))
+        .filter(
+          (veg: Vegetables) =>
+            veg.name.toLowerCase().includes(query.toLowerCase()) && veg.isAvailable
+        )
         .map((veg: Vegetables) => ({
           id: veg.id,
           name: veg.name,
-          isAvailable: veg.isAvailable, // Add this line
+          isAvailable: veg.isAvailable,
+          hasFixedPrice: veg.hasFixedPrice,
+          ...(veg.hasFixedPrice && { fixedPrice: veg.fixedPrice }), // Only include fixedPrice if hasFixedPrice is true
         }));
 
       setSuggestions(filtered);

@@ -14,19 +14,18 @@ import { EmptyState } from '~/components/bills/EmptyState';
 import { BillFilters } from '~/components/bills/BillFilters';
 import type { Bill } from '~/types';
 import { useFiltersStore } from '~/app/store/filters';
-
+import { useProviderStore } from '~/app/store/providers';
 export default function BillsScreen() {
-  // State management
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBillId, setSelectedBillId] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-
   const { bills, loading, error, fetchBills } = useBillStore();
   const { providerId, signerId, startDate, endDate } = useFiltersStore();
-
+  const { fetchProviders } = useProviderStore();
   // Initial data fetch
   useEffect(() => {
     fetchBills().catch(console.error);
+    fetchProviders().catch(console.error);
   }, []);
 
   // Pull to refresh handler
@@ -34,12 +33,13 @@ export default function BillsScreen() {
     try {
       setRefreshing(true);
       await fetchBills();
+      await fetchProviders();
     } catch (err) {
       console.error('Error refreshing bills:', err);
     } finally {
       setRefreshing(false);
     }
-  }, [fetchBills]);
+  }, [fetchBills, fetchProviders]);
 
   // Memoized filtered and sorted bills
   const filteredBills = useMemo(() => {

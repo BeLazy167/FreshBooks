@@ -2,7 +2,7 @@
   "expo": {
     "name": "FreshBooks",
     "slug": "FreshBooks",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "description": "FreshBooks is a mobile app that allows you to manage your business expenses and invoices.",
     "scheme": "freshbooks",
     "owner": "belazy",
