@@ -19,8 +19,8 @@ import {
 import { useSignerStore } from '~/app/store/signers';
 import type { Signer } from '~/types';
 interface SearchableDropdownProps {
-  value: string;
-  onSelect: (value: { id: string; name: string }) => void;
+  value?: string;
+  onSelect: (item: { name: string }) => void;
   placeholder?: string;
   containerStyle?: StyleProp<ViewStyle>;
 }
@@ -84,14 +84,14 @@ export function SearchableDropdown({
   });
 
   return (
-    <>
+    <View style={styles.container}>
       <TouchableOpacity
         style={[styles.dropdownButton, value ? styles.dropdownButtonActive : null, containerStyle]}
         onPress={openModal}>
         <Text style={[styles.dropdownButtonText, !value ? styles.placeholderText : null]}>
           {value || placeholder}
         </Text>
-        <Feather name="chevron-down" size={20} color={value ? '#2D3748' : '#A0AEC0'} />
+        <Feather name="chevron-down" size={18} color={value ? '#64748B' : '#94A3B8'} />
       </TouchableOpacity>
 
       <Modal visible={isOpen} transparent animationType="fade">
@@ -107,12 +107,12 @@ export function SearchableDropdown({
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Select Signer</Text>
               <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
-                <Feather name="x" size={24} color="#2D3748" />
+                <Feather name="x" size={20} color="#64748B" />
               </TouchableOpacity>
             </View>
 
             <View style={styles.searchContainer}>
-              <Feather name="search" size={20} color="#A0AEC0" />
+              <Feather name="search" size={16} color="#94A3B8" />
               <TextInput
                 style={styles.searchInput}
                 value={search}
@@ -135,7 +135,7 @@ export function SearchableDropdown({
                     style={[styles.optionText, value === item.name && styles.selectedOptionText]}>
                     {item.name}
                   </Text>
-                  {value === item.name && <Feather name="check" size={20} color="#4299E1" />}
+                  {value === item.name && <Feather name="check" size={16} color="#3B82F6" />}
                 </TouchableOpacity>
               )}
               style={styles.optionsList}
@@ -151,48 +151,43 @@ export function SearchableDropdown({
           </Animated.View>
         </View>
       </Modal>
-    </>
+    </View>
   );
 }
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   dropdownButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: 'white',
-    borderRadius: 16,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#E8E8E8',
-    padding: 16,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 15,
-      },
-      android: {
-        elevation: 2,
-      },
-    }),
+    borderColor: '#E2E8F0',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    height: 40,
   },
   dropdownButtonActive: {
-    borderColor: '#4299E1',
+    borderColor: '#E2E8F0',
   },
   dropdownButtonText: {
-    fontSize: 16,
-    color: '#2D3748',
+    fontSize: 14,
+    color: '#1E293B',
+    fontWeight: '400',
   },
   placeholderText: {
-    color: '#A0AEC0',
+    color: '#94A3B8',
   },
   modalOverlay: {
     flex: 1,
     justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    backgroundColor: 'rgba(0, 0, 0, 0.25)',
   },
   modalBackdrop: {
     position: 'absolute',
@@ -203,22 +198,33 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: 'white',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
     paddingTop: 16,
     maxHeight: SCREEN_HEIGHT * 0.7,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 5,
+      },
+    }),
   },
   modalHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     marginBottom: 16,
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: '600',
-    color: '#2D3748',
+    color: '#1E293B',
   },
   closeButton: {
     padding: 4,
@@ -226,40 +232,42 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F7FAFC',
-    marginHorizontal: 20,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    marginBottom: 16,
+    backgroundColor: '#F8FAFC',
+    marginHorizontal: 16,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    height: 40,
   },
   searchInput: {
     flex: 1,
-    fontSize: 16,
-    color: '#2D3748',
-    paddingVertical: 12,
-    paddingLeft: 12,
+    fontSize: 14,
+    color: '#1E293B',
+    paddingLeft: 8,
   },
   optionsList: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
   },
   optionItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 16,
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#EDF2F7',
+    borderBottomColor: '#F1F5F9',
   },
   selectedOption: {
-    backgroundColor: '#EBF8FF',
+    backgroundColor: '#F8FAFC',
   },
   optionText: {
-    fontSize: 16,
-    color: '#2D3748',
+    fontSize: 14,
+    color: '#1E293B',
   },
   selectedOptionText: {
+    color: '#3B82F6',
     fontWeight: '500',
-    color: '#4299E1',
   },
   emptyContainer: {
     padding: 20,

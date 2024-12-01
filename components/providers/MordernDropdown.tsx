@@ -9,6 +9,8 @@ import {
   TextInput,
   Animated,
   Platform,
+  StyleProp,
+  ViewStyle,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
@@ -18,7 +20,7 @@ interface DropdownProps {
   onSelect: (item: { label: string; value: string | number }) => void;
   placeholder?: string;
   searchable?: boolean;
-  containerStyle?: object;
+  containerStyle?: StyleProp<ViewStyle>;
 }
 
 export const ModernDropdown = ({
@@ -66,12 +68,12 @@ export const ModernDropdown = ({
   }, [visible, animation]);
 
   return (
-    <>
-      <TouchableOpacity onPress={toggleDropdown} style={[styles.container, containerStyle]}>
+    <View style={[styles.container, containerStyle]}>
+      <TouchableOpacity onPress={toggleDropdown} style={styles.button}>
         <Text style={[styles.selectedText, !selectedItem && styles.placeholderText]}>
           {selectedItem ? selectedItem.label : placeholder}
         </Text>
-        <Feather name={visible ? 'chevron-up' : 'chevron-down'} size={20} color="#718096" />
+        <Feather name={visible ? 'chevron-up' : 'chevron-down'} size={18} color="#94A3B8" />
       </TouchableOpacity>
 
       <Modal visible={visible} transparent animationType="none" onRequestClose={toggleDropdown}>
@@ -125,27 +127,33 @@ export const ModernDropdown = ({
           </Animated.View>
         </TouchableOpacity>
       </Modal>
-    </>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  button: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 12,
+    backgroundColor: 'white',
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: '#E2E8F0',
-    borderRadius: 8,
-    backgroundColor: 'white',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    height: 40,
   },
   selectedText: {
     fontSize: 14,
-    color: '#2D3748',
+    color: '#1E293B',
+    fontWeight: '400',
   },
   placeholderText: {
-    color: '#A0AEC0',
+    color: '#94A3B8',
   },
   overlay: {
     flex: 1,
@@ -156,15 +164,19 @@ const styles = StyleSheet.create({
   dropdown: {
     backgroundColor: 'white',
     borderRadius: 12,
+    padding: 4,
+    marginTop: 4,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
     ...Platform.select({
       ios: {
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.15,
-        shadowRadius: 12,
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
       },
       android: {
-        elevation: 4,
+        elevation: 3,
       },
     }),
   },

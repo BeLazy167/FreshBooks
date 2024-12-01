@@ -3,14 +3,17 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
+  TextInput,
   TouchableOpacity,
   StyleSheet,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+
 import { ItemInput } from '../vegetable/ItemInput';
 import { ModernDropdown } from '../providers/MordernDropdown';
+
 import { useProviderStore } from '~/app/store/providers';
 import { useSignerStore } from '~/app/store/signers';
 import type { CreateBillDTO, VegetableItem } from '~/types';
@@ -28,14 +31,16 @@ interface ItemsListProps {
 
 const ItemsList = ({ items, onRemoveItem, total }: ItemsListProps) => {
   return (
-    <View style={styles.itemsCard}>
+    <View style={[styles.itemsCard, { gap: 8 }]}>
       {items.map((item, index) => {
         const price = Number(item.price || 0);
         const quantity = Number(item.quantity || 0);
         const itemTotal = price * quantity;
 
         return (
-          <View key={index} style={styles.itemRow}>
+          <View
+            key={index}
+            style={[styles.itemRow, index === items.length - 1 && { borderBottomWidth: 0 }]}>
             <View style={styles.flex}>
               <Text style={styles.itemName}>{item.name}</Text>
               <Text style={styles.itemDetails}>
@@ -44,8 +49,11 @@ const ItemsList = ({ items, onRemoveItem, total }: ItemsListProps) => {
             </View>
             <View style={styles.itemActions}>
               <Text style={styles.itemTotal}>{formatCurrency(itemTotal.toFixed(2))}</Text>
-              <TouchableOpacity style={styles.removeButton} onPress={() => onRemoveItem(index)}>
-                <Feather name="x" size={16} color="white" />
+              <TouchableOpacity
+                style={styles.removeButton}
+                onPress={() => onRemoveItem(index)}
+                activeOpacity={0.7}>
+                <Feather name="x" size={18} color="#E53E3E" />
               </TouchableOpacity>
             </View>
           </View>
@@ -53,7 +61,7 @@ const ItemsList = ({ items, onRemoveItem, total }: ItemsListProps) => {
       })}
 
       <View style={styles.totalRow}>
-        <Text style={styles.totalLabel}>Total</Text>
+        <Text style={styles.totalLabel}>Total Amount</Text>
         <Text style={styles.totalAmount}>{formatCurrency(total.toFixed(2))}</Text>
       </View>
     </View>
@@ -64,7 +72,7 @@ export function BillForm({ onSubmit }: BillFormProps) {
   const { providers, fetchProviders } = useProviderStore();
   const { signers, fetchSigners } = useSignerStore();
   const [providerData, setProviderData] = useState({ id: '', name: '' });
-  const [signerData, setSignerData] = useState({ id: '', name: '' });
+  const [signer, setSigner] = useState({ id: '', name: '' });
   const [items, setItems] = useState<Omit<VegetableItem, 'id'>[]>([]);
   const [currentItem, setCurrentItem] = useState({
     name: '',
@@ -141,13 +149,13 @@ export function BillForm({ onSubmit }: BillFormProps) {
         providerId: providerData.id,
         providerName: providerData.name,
         date: new Date(),
-        signer: signerData.name,
+        signer: signer.name,
       });
       setProviderData({ id: '', name: '' });
-      setSignerData({ id: '', name: '' });
       setItems([]);
+      setSigner({ id: '', name: '' });
     }
-  }, [items, providerData, total, onSubmit, signerData]);
+  }, [items, providerData, total, onSubmit, signer]);
 
   const isSubmitDisabled = !providerData.id || items.length === 0;
 
@@ -155,46 +163,17 @@ export function BillForm({ onSubmit }: BillFormProps) {
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={{ flex: 1 }}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 80}>
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}>
       <ScrollView
         style={styles.container}
+        contentContainerStyle={{
+          paddingBottom: 32,
+          paddingTop: Platform.OS === 'android' ? 8 : 0,
+        }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="interactive"
-        contentContainerStyle={styles.scrollContent}>
+        keyboardDismissMode="on-drag">
         <Text style={styles.title}>Create Bill</Text>
-
-        <View style={styles.row}>
-          <View style={styles.column}>
-            <Text style={styles.sectionTitle}>Provider</Text>
-            <ModernDropdown
-              data={providers.map((p) => ({ label: p.name, value: p.id }))}
-              value={providerData.id}
-              onSelect={(selected) =>
-                setProviderData({
-                  id: selected.value.toString(),
-                  name: selected.label,
-                })
-              }
-              placeholder="Select provider"
-            />
-          </View>
-
-          <View style={styles.column}>
-            <Text style={styles.sectionTitle}>Signer</Text>
-            <ModernDropdown
-              data={signers.map((s) => ({ label: s.name, value: s.id }))}
-              value={signerData.id}
-              onSelect={(selected) =>
-                setSignerData({
-                  id: selected.value.toString(),
-                  name: selected.label,
-                })
-              }
-              placeholder="Select signer"
-            />
-          </View>
-        </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Add Item</Text>
@@ -203,14 +182,47 @@ export function BillForm({ onSubmit }: BillFormProps) {
 
         {items.length > 0 && <ItemsList items={items} onRemoveItem={removeItem} total={total} />}
 
-        <TouchableOpacity
-          style={[styles.submitButton, isSubmitDisabled && styles.submitButtonDisabled]}
-          onPress={handleSubmit}
-          disabled={isSubmitDisabled}>
-          <Text style={styles.submitButtonText}>Create Bill</Text>
-        </TouchableOpacity>
+        <View style={styles.bottomSection}>
+          <View style={styles.row}>
+            <View style={styles.dropdownContainer}>
+              <Text style={styles.sectionTitle}>Provider</Text>
+              <ModernDropdown
+                data={providers.map((p) => ({ label: p.name, value: p.id }))}
+                value={providerData.id}
+                onSelect={(selected) =>
+                  setProviderData({
+                    id: selected.value.toString(),
+                    name: selected.label,
+                  })
+                }
+                placeholder="Select a provider"
+                containerStyle={styles.dropdown}
+              />
+            </View>
+            <View style={styles.dropdownContainer}>
+              <Text style={styles.sectionTitle}>Signer</Text>
+              <ModernDropdown
+                data={signers.map((s) => ({ label: s.name, value: s.id }))}
+                value={signer.id}
+                onSelect={(selected) =>
+                  setSigner({
+                    id: selected.value.toString(),
+                    name: selected.label,
+                  })
+                }
+                placeholder="Select a signer"
+                containerStyle={styles.dropdown}
+              />
+            </View>
+          </View>
 
-        <View style={styles.bottomPadding} />
+          <TouchableOpacity
+            style={[styles.submitButton, isSubmitDisabled && styles.submitButtonDisabled]}
+            onPress={handleSubmit}
+            disabled={isSubmitDisabled}>
+            <Text style={styles.submitButtonText}>Create Bill</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -220,40 +232,48 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingBottom: Platform.OS === 'android' ? 120 : 20,
-  },
-  bottomPadding: {
-    height: Platform.OS === 'android' ? 100 : 20,
+    backgroundColor: '#F8FAFC',
   },
   title: {
     fontSize: 24,
-    fontWeight: '700',
-    color: '#1A202C',
-    marginBottom: 20,
+    fontWeight: '600',
+    color: '#1E293B',
+    marginBottom: 24,
   },
   section: {
     marginBottom: 16,
+    backgroundColor: 'white',
+    padding: 16,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
   },
   sectionTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#2D3748',
-    marginBottom: 6,
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#64748B',
+    marginBottom: 8,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   itemsCard: {
     backgroundColor: 'white',
     borderRadius: 12,
-    padding: 12,
+    padding: 16,
     marginBottom: 20,
     elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
   },
   itemRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#EDF2F7',
   },
@@ -261,30 +281,30 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   itemName: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '500',
     color: '#2D3748',
+    marginBottom: 4,
   },
   itemDetails: {
-    fontSize: 12,
+    fontSize: 14,
     color: '#718096',
-    marginTop: 2,
   },
   itemActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 12,
   },
   itemTotal: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '600',
     color: '#2D3748',
   },
   removeButton: {
-    backgroundColor: '#FC8181',
-    width: 28,
-    height: 28,
-    borderRadius: 6,
+    backgroundColor: '#FEB2B2',
+    width: 32,
+    height: 32,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -292,43 +312,63 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 12,
-    paddingTop: 12,
+    marginTop: 16,
+    paddingTop: 16,
     borderTopWidth: 1,
     borderTopColor: '#EDF2F7',
   },
   totalLabel: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '600',
     color: '#2D3748',
+    letterSpacing: 0.5,
   },
   totalAmount: {
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: '700',
-    color: '#2D3748',
+    color: '#4299E1',
   },
-  submitButton: {
-    backgroundColor: '#4299E1',
-    borderRadius: 12,
+  bottomSection: {
+    backgroundColor: 'white',
+    borderRadius: 16,
     padding: 16,
-    alignItems: 'center',
-    marginVertical: 16,
+    marginTop: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
     elevation: 2,
-  },
-  submitButtonDisabled: {
-    backgroundColor: '#CBD5E0',
-  },
-  submitButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
   },
   row: {
     flexDirection: 'row',
+    alignItems: 'flex-start',
     gap: 12,
-    marginBottom: 20,
+    marginBottom: 16,
   },
-  column: {
+  dropdownContainer: {
     flex: 1,
+  },
+  dropdown: {
+    height: 40,
+    backgroundColor: 'white',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  submitButton: {
+    backgroundColor: '#F1F5F9',
+    borderRadius: 12,
+    padding: 14,
+    alignItems: 'center',
+  },
+  submitButtonDisabled: {
+    backgroundColor: '#CBD5E0',
+    elevation: 0,
+    shadowOpacity: 0,
+  },
+  submitButtonText: {
+    color: '#64748B',
+    fontSize: 15,
+    fontWeight: '500',
   },
 });
