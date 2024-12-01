@@ -1,8 +1,17 @@
 // app/(tabs)/bills/index.tsx
 import { Stack, router } from 'expo-router';
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { ScrollView, StyleSheet, View, ActivityIndicator, RefreshControl } from 'react-native';
+import {
+  ScrollView,
+  StyleSheet,
+  View,
+  ActivityIndicator,
+  RefreshControl,
+  TouchableOpacity,
+  Platform,
+} from 'react-native';
 import { startOfDay, endOfDay, isWithinInterval } from 'date-fns';
+import { Feather } from '@expo/vector-icons';
 
 import { useBillStore } from '~/app/store/bills';
 import { Container } from '~/components/Container';
@@ -102,6 +111,21 @@ export default function BillsScreen() {
     setSelectedBillId(null);
   }, []);
 
+  const handleCacheRefresh = useCallback(async () => {
+    try {
+      const response = await fetch('/api/cache/reset');
+      if (response.ok) {
+        // Refresh the bills data after cache reset
+        await fetchBills();
+        await fetchProviders();
+      } else {
+        console.error('Failed to reset cache');
+      }
+    } catch (error) {
+      console.error('Error refreshing cache:', error);
+    }
+  }, [fetchBills, fetchProviders]);
+
   // Loading state
   if (loading && !refreshing) {
     return (
@@ -144,12 +168,22 @@ export default function BillsScreen() {
         }>
         <BillHeader count={filteredBills.length} onAddPress={handleAddBill} />
 
-        <View style={styles.searchFilters}>
-          <BillSearch
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            onClear={() => setSearchQuery('')}
-          />
+        <View style={styles.filtersContainer}>
+          <View style={styles.searchRow}>
+            <View style={styles.searchWrapper}>
+              <BillSearch
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                onClear={() => setSearchQuery('')}
+              />
+            </View>
+            <TouchableOpacity
+              style={styles.refreshButton}
+              onPress={handleCacheRefresh}
+              activeOpacity={0.7}>
+              <Feather name="refresh-cw" size={20} color="white" />
+            </TouchableOpacity>
+          </View>
           <BillFilters />
         </View>
 
@@ -172,11 +206,38 @@ export default function BillsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    padding: 16,
   },
-  searchFilters: {
-    marginBottom: 24,
+  filtersContainer: {
+    gap: 16,
+    marginBottom: 20,
+  },
+  searchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 12,
-    paddingHorizontal: 16,
+  },
+  searchWrapper: {
+    flex: 1,
+  },
+  refreshButton: {
+    backgroundColor: '#4299E1',
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#4299E1',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
   },
   centered: {
     flex: 1,
