@@ -70,18 +70,6 @@ export function BillFilters() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.headerRow}>
-        <View style={styles.filterCount}>
-          {hasActiveFilters && (
-            <Text style={styles.filterCountText}>{filteredCount} bills found</Text>
-          )}
-        </View>
-        <TouchableOpacity style={styles.exportButton} onPress={handleExportExcel}>
-          <Feather name="download" size={20} color="#4299E1" />
-          <Text style={styles.exportButtonText}>Export Excel</Text>
-        </TouchableOpacity>
-      </View>
-
       <View style={styles.row}>
         <View style={styles.filterItem}>
           <ProviderDropdown
@@ -117,6 +105,11 @@ export function BillFilters() {
         </TouchableOpacity>
       </View>
 
+      <TouchableOpacity style={styles.exportButton} onPress={handleExportExcel}>
+        <Feather name="download" size={20} color="#4299E1" />
+        <Text style={styles.exportButtonText}>Export Excel</Text>
+      </TouchableOpacity>
+
       {hasActiveFilters && (
         <TouchableOpacity style={styles.clearButton} onPress={clearFilters}>
           <Feather name="x" size={20} color="#FC8181" />
@@ -147,7 +140,6 @@ export function BillFilters() {
 const styles = StyleSheet.create({
   container: {
     gap: 12,
-    marginBottom: 16,
   },
   row: {
     flexDirection: 'row',
@@ -169,7 +161,22 @@ const styles = StyleSheet.create({
   },
   dateButtonText: {
     color: '#4A5568',
-    fontSize: 16,
+    fontSize: 14,
+    flex: 1,
+  },
+  exportButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: 12,
+    borderRadius: 12,
+    backgroundColor: '#EBF8FF',
+    justifyContent: 'center',
+  },
+  exportButtonText: {
+    color: '#4299E1',
+    fontSize: 14,
+    fontWeight: '500',
   },
   clearButton: {
     flexDirection: 'row',
@@ -183,32 +190,6 @@ const styles = StyleSheet.create({
   clearButtonText: {
     color: '#FC8181',
     fontSize: 16,
-    fontWeight: '500',
-  },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  filterCount: {
-    flex: 1,
-  },
-  filterCountText: {
-    fontSize: 14,
-    color: '#718096',
-  },
-  exportButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    padding: 8,
-    borderRadius: 8,
-    backgroundColor: '#EBF8FF',
-  },
-  exportButtonText: {
-    color: '#4299E1',
-    fontSize: 14,
     fontWeight: '500',
   },
 });
