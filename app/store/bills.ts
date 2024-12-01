@@ -1,7 +1,7 @@
 // store/bills.ts
 import { create } from 'zustand';
 
-import { BillAPI } from '~/app/services/api';
+import { BillAPI, CacheResetAPI } from '~/app/services/api';
 import type { Bill } from '~/types';
 
 export interface BillStore {
@@ -12,6 +12,7 @@ export interface BillStore {
   createBill: (bill: Bill) => Promise<void>;
   getBillById: (id: string) => Promise<Bill | undefined>;
   updateBill: (id: string, updates: Partial<Omit<Bill, 'id'>>) => Promise<void>;
+  allCacheReset: () => void;
 }
 
 export const useBillStore = create<BillStore>((set, get) => ({
@@ -73,6 +74,11 @@ export const useBillStore = create<BillStore>((set, get) => ({
       set({ error: 'Failed to update bill', loading: false });
       throw error;
     }
+  },
+  allCacheReset: async () => {
+    const { error } = await CacheResetAPI.reset();
+    if (error) throw new Error(error);
+    set({ bills: [] });
   },
 }));
 

@@ -12,7 +12,6 @@ import {
 } from 'react-native';
 import { startOfDay, endOfDay, isWithinInterval } from 'date-fns';
 import { Feather } from '@expo/vector-icons';
-
 import { useBillStore } from '~/app/store/bills';
 import { Container } from '~/components/Container';
 import { BillFromId } from '~/components/bills/BillFromId';
@@ -28,7 +27,7 @@ export default function BillsScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBillId, setSelectedBillId] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-  const { bills, loading, error, fetchBills } = useBillStore();
+  const { bills, loading, error, fetchBills, allCacheReset } = useBillStore();
   const { providerId, signerId, startDate, endDate } = useFiltersStore();
   const { fetchProviders } = useProviderStore();
   // Initial data fetch
@@ -113,18 +112,13 @@ export default function BillsScreen() {
 
   const handleCacheRefresh = useCallback(async () => {
     try {
-      const response = await fetch('/api/cache/reset');
-      if (response.ok) {
-        // Refresh the bills data after cache reset
-        await fetchBills();
-        await fetchProviders();
-      } else {
-        console.error('Failed to reset cache');
-      }
+      await allCacheReset();
+      await fetchBills();
+      await fetchProviders();
     } catch (error) {
       console.error('Error refreshing cache:', error);
     }
-  }, [fetchBills, fetchProviders]);
+  }, [allCacheReset, fetchBills, fetchProviders]);
 
   // Loading state
   if (loading && !refreshing) {

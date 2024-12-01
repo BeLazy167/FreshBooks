@@ -80,6 +80,12 @@ export const ProviderAPI = {
   },
 };
 
+export const CacheResetAPI = {
+  async reset() {
+    return fetchAPI<void>('/cache/reset');
+  },
+};
+
 export const VegetableAPI = {
   async getAll() {
     return fetchAPI<Vegetables[]>('/vegetables');
