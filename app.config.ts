@@ -5,7 +5,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   name: 'FreshBooks',
   slug: 'FreshBooks',
   scheme: 'freshbooks',
-  version: '1.0.0',
+  version: '1.0.1',
   orientation: 'portrait',
   icon: './assets/icon.png',
   userInterfaceStyle: 'light',
@@ -14,13 +14,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     image: './assets/splash.png',
     resizeMode: 'contain',
     backgroundColor: '#299737',
-    imageResizeMode: 'contain'
   },
   ios: {
     supportsTablet: true,
     bundleIdentifier: 'com.belazy.FreshBooks',
+    buildNumber: '2',
     newArchEnabled: true,
-    icon: './assets/icon.png',
     splash: {
       image: './assets/splash.png',
       resizeMode: 'contain',
@@ -38,6 +37,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       backgroundColor: '#299737'
     },
     package: 'com.belazy.FreshBooks',
+    versionCode: 2,
     newArchEnabled: true,
     splash: {
       image: './assets/splash.png',

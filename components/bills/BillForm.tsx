@@ -9,6 +9,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 
 import { ItemInput } from '../vegetable/ItemInput';
@@ -79,6 +80,7 @@ export function BillForm({ onSubmit }: BillFormProps) {
     quantity: 0,
     price: 0,
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (providers.length === 0) {
@@ -138,26 +140,31 @@ export function BillForm({ onSubmit }: BillFormProps) {
     }
   }, [items]);
 
-  const handleSubmit = useCallback(() => {
-    if (providerData.id && items.length > 0) {
-      onSubmit({
-        items: items.map((item: Omit<VegetableItem, 'id'>, index: number) => ({
-          ...item,
-          id: index.toString(),
-        })),
-        total,
-        providerId: providerData.id,
-        providerName: providerData.name,
-        date: new Date(),
-        signer: signer.name,
-      });
-      setProviderData({ id: '', name: '' });
-      setItems([]);
-      setSigner({ id: '', name: '' });
+  const handleSubmit = useCallback(async () => {
+    if (providerData.id && items.length > 0 && signer.id) {
+      setIsSubmitting(true);
+      try {
+        await onSubmit({
+          items: items.map((item: Omit<VegetableItem, 'id'>, index: number) => ({
+            ...item,
+            id: index.toString(),
+          })),
+          total,
+          providerId: providerData.id,
+          providerName: providerData.name,
+          date: new Date(),
+          signer: signer.name,
+        });
+        setProviderData({ id: '', name: '' });
+        setItems([]);
+        setSigner({ id: '', name: '' });
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   }, [items, providerData, total, onSubmit, signer]);
 
-  const isSubmitDisabled = !providerData.id || items.length === 0;
+  const isSubmitDisabled = !providerData.id || !signer.id || items.length === 0;
 
   return (
     <KeyboardAvoidingView
@@ -217,10 +224,23 @@ export function BillForm({ onSubmit }: BillFormProps) {
           </View>
 
           <TouchableOpacity
-            style={[styles.submitButton, isSubmitDisabled && styles.submitButtonDisabled]}
+            style={[
+              styles.submitButton,
+              isSubmitDisabled ? styles.submitButtonDisabled : styles.submitButtonEnabled,
+            ]}
             onPress={handleSubmit}
-            disabled={isSubmitDisabled}>
-            <Text style={styles.submitButtonText}>Create Bill</Text>
+            disabled={isSubmitDisabled || isSubmitting}>
+            {isSubmitting ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text
+                style={[
+                  styles.submitButtonText,
+                  !isSubmitDisabled && styles.submitButtonTextEnabled,
+                ]}>
+                Create Bill
+              </Text>
+            )}
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -356,10 +376,17 @@ const styles = StyleSheet.create({
     borderColor: '#E2E8F0',
   },
   submitButton: {
-    backgroundColor: '#F1F5F9',
     borderRadius: 12,
     padding: 14,
     alignItems: 'center',
+  },
+  submitButtonEnabled: {
+    backgroundColor: '#3B82F6',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
   },
   submitButtonDisabled: {
     backgroundColor: '#CBD5E0',
@@ -367,8 +394,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0,
   },
   submitButtonText: {
-    color: '#64748B',
     fontSize: 15,
-    fontWeight: '500',
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  submitButtonTextEnabled: {
+    color: '#FFFFFF',
   },
 });
